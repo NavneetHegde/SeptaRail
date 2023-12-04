@@ -1,0 +1,8 @@
+{
+  "profiles": {
+    "GetTrainsFunction": {
+      "commandName": "Project",
+      "commandLineArgs": "--port 7143 --useHttps --cert $(ProjectDir)\\certificate.pfx --password \"123\""
+    }
+  }
+}

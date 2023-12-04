@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             x:Class="SeptaRail.ClientApp.Views.Pages.AboutPage"
+             Title="About">
+    <Grid RowDefinitions="250,*" RowSpacing="15" Padding="10,10,10,10">
+        <Border StrokeThickness="0" StrokeShape="RoundRectangle 25" BackgroundColor="{StaticResource Primary100}">
+            <Border.Shadow>
+                <Shadow Radius="60" Opacity="0.2" />
+            </Border.Shadow>
+            <VerticalStackLayout Spacing="27" Margin="25,10,25,5">
+                <HorizontalStackLayout Spacing="10">
+                    <Image Source="dotnet_bot.png" SemanticProperties.Description="Seprr" HeightRequest="64" />
+                    <Label FontSize="22" FontAttributes="Bold" Text="Seprr" TextColor="{StaticResource Secondary}" VerticalOptions="End" />
+                    <Label FontSize="22" Text="1.0.0-alpha" TextColor="{StaticResource Secondary}" VerticalOptions="End" />
+                </HorizontalStackLayout>
+                <Label Text="Updates Septa regional rail user of next three trains arriving from specific source to destination." 
+                       TextColor="{StaticResource Secondary}"/>
+                <Button Text="Learn more..."/>
+            </VerticalStackLayout>
+        </Border>
+    </Grid>
+</ContentPage>

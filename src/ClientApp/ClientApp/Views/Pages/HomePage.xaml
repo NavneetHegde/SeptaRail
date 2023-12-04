@@ -1,0 +1,80 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             x:Class="SeptaRail.ClientApp.Views.Pages.HomePage"
+             xmlns:local="clr-namespace:SeptaRail.ClientApp.ViewModel"
+             xmlns:toolkit="http://schemas.microsoft.com/dotnet/2022/maui/toolkit"
+             Title="Home">
+    <Grid RowDefinitions="*,25" IgnoreSafeArea="True">
+        <ScrollView HorizontalScrollBarVisibility="Never">
+            <Grid RowDefinitions="250,30,*" RowSpacing="15" Padding="10,10,10,10">
+                <!-- General information. -->
+                <Border StrokeThickness="0" StrokeShape="RoundRectangle 25" BackgroundColor="{StaticResource Primary100}">
+                    <Border.Shadow>
+                        <Shadow Radius="60" Opacity="0.2" />
+                    </Border.Shadow>
+                    <Grid RowDefinitions="*,*,40,*" VerticalOptions="Center" Margin="25,5,25,5">
+                        <Picker Grid.Row="0" FontSize="16" TextColor="{StaticResource Secondary}" SelectedItem="{Binding FromPickerSelectedText}" Title="Station From" ItemsSource="{Binding StationList}" />
+                        <Picker Grid.Row="1" FontSize="16" TextColor="{StaticResource Secondary}" SelectedItem="{Binding ToPickerSelectedText}" Title="To From" ItemsSource="{Binding StationList}" />
+                        <Button Grid.Row="3" FontSize="16" Text="Search" VerticalOptions="Center" Command="{Binding SearchTrainCommand}" />
+                    </Grid>
+                </Border>
+
+                <!-- Header and Date -->
+                <Grid Grid.Row="1" RowDefinitions="*" ColumnDefinitions="Auto,*" Padding="15,5,15,0"  >
+                    <Label Grid.Column="0" Text="Next Trains" FontAttributes="Bold" FontSize="20" TextColor="{StaticResource Primary}" VerticalOptions="Center" />
+                    <!-- Binding DateTime.Now to label to show current date. -->
+                    <Label Grid.Column="2" Text="{Binding DateTime, StringFormat='{0:MMM d, yyyy HH:mm:ss}'}" FontSize="14" FontAttributes="Bold" TextColor="{StaticResource Primary}" VerticalOptions="Center" HorizontalOptions="End" />
+                </Grid>
+
+                <!-- Items. -->
+                <VerticalStackLayout Grid.Row="2" BindableLayout.ItemsSource="{Binding NextTrains}" Spacing="20" Padding="0,15,0,15">
+                    <BindableLayout.ItemTemplate>
+                        <DataTemplate>
+                            <Border StrokeThickness="0"  BackgroundColor="{StaticResource Primary100}"  StrokeShape="RoundRectangle 25" HeightRequest="80">
+                                <Border.Shadow>
+                                    <Shadow Radius="60"  Opacity="0.2" />
+                                </Border.Shadow>
+                                <Grid RowDefinitions="60" ColumnDefinitions="60,Auto,*,Auto" RowSpacing="15"
+                                  ColumnSpacing="10" Padding="15,0,15,0" VerticalOptions="Center">
+                                    <Border StrokeThickness="0" StrokeShape="RoundRectangle 20"
+                                        BackgroundColor="{StaticResource Primary}">
+                                        <Label Text="{Binding orig_train, StringFormat='{0}'}" TextColor="White" FontAttributes="Bold" FontSize="20"  HorizontalTextAlignment="Center" VerticalTextAlignment="Center"/>
+                                    </Border>
+
+                                    <VerticalStackLayout  Grid.Column="1" VerticalOptions="Center">
+                                        <Label Text="{Binding orig_departure_time, StringFormat='Departure : {0}'}" TextColor="{StaticResource Secondary}" 
+                                           FontAttributes="Bold" FontSize="18" LineBreakMode="TailTruncation"></Label>
+                                        <Label Text="{Binding orig_arrival_time, StringFormat='Destination Time : {0}'}" TextColor="{StaticResource Secondary}" 
+                                           FontSize="14" FontAttributes="None" LineBreakMode="TailTruncation"></Label>
+                                        <Label Text="{Binding orig_line, StringFormat='On {0} Line'}" TextColor="{StaticResource Secondary}" 
+                                           FontSize="14" LineBreakMode="TailTruncation" />
+                                    </VerticalStackLayout>
+
+                                    <Label Grid.Column="3" MaximumWidthRequest="60" Text="{Binding orig_delay, StringFormat='Delay {0}'}" FontSize="18" 
+                                       TextColor="Red" FontAttributes="Bold" x:Name="DelayLabel" 
+                                       VerticalOptions="Center" HorizontalTextAlignment="Center" LineBreakMode="CharacterWrap">
+                                        <Label.Style>
+                                            <Style TargetType="{x:Type Label}">
+                                                <Style.Triggers>
+                                                    <DataTrigger TargetType="{x:Type Label}" Binding="{Binding orig_delay}" Value="On time">
+                                                        <Setter Property="TextColor" Value="Green"></Setter>
+                                                        <Setter Property="Text" Value="{Binding orig_delay}"></Setter>
+                                                    </DataTrigger>
+                                                    <DataTrigger TargetType="{x:Type Label}" Binding="{Binding orig_delay}" Value="...">
+                                                        <Setter Property="TextColor" Value="Gray"></Setter>
+                                                        <Setter Property="Text" Value="..."></Setter>
+                                                    </DataTrigger>
+                                                </Style.Triggers>
+                                            </Style>
+                                        </Label.Style>
+                                    </Label>
+                                </Grid>
+                            </Border>
+                        </DataTemplate>
+                    </BindableLayout.ItemTemplate>
+                </VerticalStackLayout>
+            </Grid>
+        </ScrollView>
+    </Grid>
+</ContentPage>

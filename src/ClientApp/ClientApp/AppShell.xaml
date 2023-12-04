@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<Shell
+    x:Class="SeptaRail.ClientApp.AppShell"
+    xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+    xmlns:local="clr-namespace:SeptaRail.ClientApp.Views.Pages"
+    Shell.FlyoutBehavior="Disabled">
+
+    <TabBar>
+        <ShellContent Title="Home" ContentTemplate="{DataTemplate local:HomePage}" Icon="icon_home" Route="HomePage" />
+        <ShellContent Title="About" ContentTemplate="{DataTemplate local:AboutPage}" Icon="icon_about" Route="AboutPage" />
+    </TabBar>
+</Shell>

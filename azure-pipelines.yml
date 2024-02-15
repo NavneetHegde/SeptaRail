@@ -11,11 +11,7 @@ pool:
 
 steps:
 - task: DotNetCoreCLI@2
-  inputs:
-    command: build
-    projects: 'src/GetTrainsFunction/GetTrainsFunction.csproj'
-    configuration: '--configuration Release'
-- task: DotNetCoreCLI@2
+  displayName: 'Build and Publish'
   inputs:
     command: publish
     arguments: '--configuration Release --output publish_output'
@@ -30,6 +26,7 @@ steps:
     includeRootFolder: false
     archiveFile: "$(System.DefaultWorkingDirectory)/build$(Build.BuildId).zip"
 - task: PublishBuildArtifacts@1
+  displayName: 'Publish Artifact'
   inputs:
-    PathtoPublish: '$(System.DefaultWorkingDirectory)/build@(Build.BuildId).zip'
+    PathtoPublish: '$(System.DefaultWorkingDirectory)/build$(Build.BuildId).zip'
     ArtifactName: 'drop'

@@ -13,13 +13,13 @@ steps:
 - task: DotNetCoreCLI@2
   inputs:
     command: build
-    projects: 'src/GetTrainFunction/GetTrainFunction.csproj'
+    projects: 'src/GetTrainsFunction/GetTrainsFunction.csproj'
     configuration: '--configuration Release'
 - task: DotNetCoreCLI@2
   inputs:
     command: publish
     arguments: '--configuration Release --output publish_output'
-    projects: 'src/GetTrainFunction/GetTrainFunction.csproj'
+    projects: 'src/GetTrainsFunction/GetTrainsFunction.csproj'
     publishWebProjects: false
     modifyOutputPath: false
     zipAfterPublish: false

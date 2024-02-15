@@ -10,10 +10,11 @@ pool:
   vmImage: windows-latest
 
 steps:
-- script: |
-    dotnet restore
-    dotnet build --configurtion Release
-  
+- task: DotNetCoreCLI@2
+  inputs:
+    command: build
+    projects: '*GetTrainFunction.csproj'
+    configuration: '--configuration Release'
 - task: DotNetCoreCLI@2
   inputs:
     command: publish

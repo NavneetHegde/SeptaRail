@@ -5,7 +5,7 @@ pr:
      - release
   paths:
    include:
-     - '../src/GetTrainsFunction/GetTrainsFunction.csproj'
+     - '../../src/GetTrainsFunction/GetTrainsFunction.csproj'
 
 
 pool:
@@ -17,7 +17,7 @@ steps:
     inputs:
       command: publish
       arguments: '--configuration Release --output publish_output'
-      projects: '../src/GetTrainsFunction/GetTrainsFunction.csproj'
+      projects: '../../src/GetTrainsFunction/GetTrainsFunction.csproj'
       publishWebProjects: false
       modifyOutputPath: false
       zipAfterPublish: false
@@ -26,7 +26,7 @@ steps:
     displayName: 'Unit Test'
     inputs:
       command: test
-      projects: '../test/GetTrainsFunction.Tests/*.csproj'
+      projects: '../../test/GetTrainsFunction.Tests/*.csproj'
       arguments: '--configuration Release'
 
   - task: ArchiveFiles@2

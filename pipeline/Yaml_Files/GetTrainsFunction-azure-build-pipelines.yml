@@ -30,14 +30,16 @@ steps:
     inputs:
       command: test
       projects: 'test/GetTrainsFunction.Tests/*.csproj'
-      arguments: '--configuration $(buildConfiguration) /p:CollectCoverage=true /p:CoverletOutputFormat=cobertura'
+      arguments: '--configuration $(buildConfiguration) --collect:"XPlat Code Coverage" -- DataCollectionRunSettings.DataCollectors.DataCollector.Configuration.Format=cobertura'
+      publishTestResults: true
+
 
   - task: PublishCodeCoverageResults@1
-    displayName: "Publish code coverage results"
+    displayName: 'Publish code coverage report'
     inputs:
-      codeCoverageTool: "Cobertura"
-      summaryFileLocation: "**/*coverage.cobertura.xml"
-
+      codeCoverageTool: 'Cobertura'
+      summaryFileLocation: '$(Agent.TempDirectory)/**/coverage.cobertura.xml'
+      
   - task: ArchiveFiles@2
     displayName: "Archive Files"
     inputs:

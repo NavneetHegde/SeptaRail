@@ -30,7 +30,7 @@ steps:
     inputs:
       command: test
       projects: 'test/GetTrainsFunction.Tests/*.csproj'
-      arguments: '--configuration $(buildConfiguration) --collect:"XPlat Code Coverage" -- DataCollectionRunSettings.DataCollectors.DataCollector.Configuration.Format=cobertura'
+      arguments: '--configuration $(buildConfiguration) --collect:"XPlat Code Coverage"'
       publishTestResults: true
 
 

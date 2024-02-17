@@ -1,14 +1,10 @@
-using System;
-using System.Collections.Generic;
-using System.IO;
+using Microsoft.Azure.Functions.Worker;
+using Microsoft.Azure.Functions.Worker.Http;
+using Microsoft.Extensions.Logging;
 using System.Net;
 using System.Net.Http.Headers;
 using System.Text;
 using System.Text.Json;
-using System.Threading.Tasks;
-using Microsoft.Azure.Functions.Worker;
-using Microsoft.Azure.Functions.Worker.Http;
-using Microsoft.Extensions.Logging;
 
 namespace GetTrainsFunction;
 
@@ -16,7 +12,6 @@ public class NextThreeTrainFunction
 {
     private readonly ILogger _logger;
     private readonly IHttpClientFactory _httpClientFactory = null!;
-
 
     public NextThreeTrainFunction(ILoggerFactory loggerFactory, IHttpClientFactory httpClientFactory)
     {
@@ -96,6 +91,12 @@ public class NextThreeTrainFunction
 
             HttpResponseMessage response = await client.SendAsync(request);
             _logger.LogInformation($"Calling Septa API complete. Result {response?.StatusCode}");
+
+
+            if (!response.IsSuccessStatusCode)
+            {
+                throw new Exception($"{response.StatusCode} {response.ReasonPhrase} ");
+            }
 
             return response?.Content.ReadAsStringAsync().Result ?? string.Empty;
         }

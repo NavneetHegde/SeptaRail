@@ -9,11 +9,16 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ClientApp", "src\ClientApp\
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{3B080A46-6976-4351-BECE-68D6F3799814}"
 	ProjectSection(SolutionItems) = preProject
+		pipeline\Yaml_Files\GetTrainsFunction-azure-build-pipelines.yml = pipeline\Yaml_Files\GetTrainsFunction-azure-build-pipelines.yml
 		nuget.config = nuget.config
 		README.md = README.md
 	EndProjectSection
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "GetTrainsFunction", "src\GetTrainsFunction\GetTrainsFunction.csproj", "{E6917018-B23E-40CB-BFA2-35546F5764C8}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "GetTrainsFunction", "src\GetTrainsFunction\GetTrainsFunction.csproj", "{E6917018-B23E-40CB-BFA2-35546F5764C8}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "GetTrainsFunction.Tests", "test\GetTrainsFunction.Tests\GetTrainsFunction.Tests.csproj", "{E9EA09C0-64D6-41D8-902D-C885B4F0CC40}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "tests", "tests", "{A9EDBFEA-D71C-494D-8A85-E66D7B67DD30}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -31,6 +36,10 @@ Global
 		{E6917018-B23E-40CB-BFA2-35546F5764C8}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{E6917018-B23E-40CB-BFA2-35546F5764C8}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{E6917018-B23E-40CB-BFA2-35546F5764C8}.Release|Any CPU.Build.0 = Release|Any CPU
+		{E9EA09C0-64D6-41D8-902D-C885B4F0CC40}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{E9EA09C0-64D6-41D8-902D-C885B4F0CC40}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{E9EA09C0-64D6-41D8-902D-C885B4F0CC40}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{E9EA09C0-64D6-41D8-902D-C885B4F0CC40}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -38,6 +47,7 @@ Global
 	GlobalSection(NestedProjects) = preSolution
 		{EF7E223F-6221-4139-A059-F1EC48C3FFCD} = {3F6F6FC5-902A-4C60-B3B0-6E2FA28BA048}
 		{E6917018-B23E-40CB-BFA2-35546F5764C8} = {3F6F6FC5-902A-4C60-B3B0-6E2FA28BA048}
+		{E9EA09C0-64D6-41D8-902D-C885B4F0CC40} = {A9EDBFEA-D71C-494D-8A85-E66D7B67DD30}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {9405D054-55F2-4833-907D-B90F82FAD563}

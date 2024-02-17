@@ -2,6 +2,11 @@ pr:
   branches:
    include:
      - master
+     - release
+  paths:
+   include:
+     - '../src/GetTrainsFunction/GetTrainsFunction.csproj'
+
 
 pool:
   vmImage: windows-latest
@@ -12,16 +17,25 @@ steps:
     inputs:
       command: publish
       arguments: '--configuration Release --output publish_output'
-      projects: 'src/GetTrainsFunction/GetTrainsFunction.csproj'
+      projects: '../src/GetTrainsFunction/GetTrainsFunction.csproj'
       publishWebProjects: false
       modifyOutputPath: false
       zipAfterPublish: false
+
+  - task: DotNetCoreCLI@2
+    displayName: 'Unit Test'
+    inputs:
+      command: test
+      projects: '../test/GetTrainsFunction.Tests/*.csproj'
+      arguments: '--configuration Release'
+
   - task: ArchiveFiles@2
     displayName: "Archive Files"
     inputs:
       rootFolderOrFile: "$(System.DefaultWorkingDirectory)/publish_output"
       includeRootFolder: false
       archiveFile: "$(System.DefaultWorkingDirectory)/build$(Build.BuildId).zip"
+
   - task: PublishBuildArtifacts@1
     displayName: 'Publish Artifact'
     inputs:

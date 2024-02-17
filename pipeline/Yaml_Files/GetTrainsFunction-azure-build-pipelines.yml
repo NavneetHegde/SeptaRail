@@ -7,27 +7,36 @@ pr:
    include:
      - 'src/GetTrainsFunction/GetTrainsFunction.csproj'
 
-
 pool:
   vmImage: windows-latest
+
+variables:
+  buildConfiguration: 'Release'
+
 
 steps:
   - task: DotNetCoreCLI@2
     displayName: 'Build and Publish'
     inputs:
       command: publish
-      arguments: '--configuration Release --output publish_output'
+      arguments: '--configuration $(buildConfiguration) --output publish_output'
       projects: 'src/GetTrainsFunction/GetTrainsFunction.csproj'
       publishWebProjects: false
       modifyOutputPath: false
       zipAfterPublish: false
 
   - task: DotNetCoreCLI@2
-    displayName: 'Unit Test'
+    displayName: 'Run xUnit tests with code coverage'
     inputs:
       command: test
       projects: 'test/GetTrainsFunction.Tests/*.csproj'
-      arguments: '--configuration Release'
+      arguments: '--configuration $(buildConfiguration) /p:CollectCoverage=true /p:CoverletOutputFormat=cobertura'
+
+  - task: PublishCodeCoverageResults@1
+    displayName: "Publish code coverage results"
+    inputs:
+      codeCoverageTool: "Cobertura"
+      summaryFileLocation: "**/*coverage.cobertura.xml"
 
   - task: ArchiveFiles@2
     displayName: "Archive Files"

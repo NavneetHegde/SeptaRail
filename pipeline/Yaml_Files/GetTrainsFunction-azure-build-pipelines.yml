@@ -16,6 +16,18 @@ variables:
 
 steps:
 
+  - script: dotnet tool install --global GitVersion.Tool
+    displayName: 'Install GitVersion'
+
+  - script: |
+      dotnet-gitversion /updateassemblyinfo /nofetch
+      dotnet-gitversion /output buildserver /showvariable FullSemVer
+    displayName: 'Get Version'
+
+  - script: |
+      dotnet-gitversion /updateassemblyinfo /nofetch
+    displayName: 'Update AssemblyInfo.cs'
+
   - task: UseDotNet@2
     inputs:
       version: '8.x'
@@ -46,15 +58,8 @@ steps:
       codeCoverageTool: 'Cobertura'
       summaryFileLocation: '$(Agent.TempDirectory)/**/coverage.cobertura.xml'
       
-  - task: ArchiveFiles@2
-    displayName: "Archive Files"
-    inputs:
-      rootFolderOrFile: "$(System.DefaultWorkingDirectory)/publish_output"
-      includeRootFolder: false
-      archiveFile: "$(System.DefaultWorkingDirectory)/build$(Build.BuildId).zip"
-
   - task: PublishBuildArtifacts@1
     displayName: 'Publish Artifact'
     inputs:
-      PathtoPublish: '$(System.DefaultWorkingDirectory)/build$(Build.BuildId).zip'
+      PathtoPublish: '$(Build.ArtifactStagingDirectory)'
       ArtifactName: 'drop'

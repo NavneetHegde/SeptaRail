@@ -60,7 +60,14 @@ steps:
     inputs:
       codeCoverageTool: 'Cobertura'
       summaryFileLocation: '$(Agent.TempDirectory)/**/coverage.cobertura.xml'
-      
+
+  - task: ArchiveFiles@2
+    displayName: "Archive Files"
+    inputs:
+      rootFolderOrFile: "$(System.DefaultWorkingDirectory)/publish_output"
+      includeRootFolder: false
+      archiveFile: "$(System.DefaultWorkingDirectory)/build$(VersionNumber).zip"
+
   - task: PublishBuildArtifacts@1
     displayName: 'Publish Artifact'
     inputs:

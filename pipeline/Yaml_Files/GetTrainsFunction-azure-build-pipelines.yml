@@ -24,6 +24,7 @@ steps:
   - script: |
       dotnet-gitversion /updateassemblyinfo /nofetch
       dotnet-gitversion /output buildserver /showvariable FullSemVer
+      echo "##vso[task.setvariable variable=VersionNumber]$(FullSemVer)"
     displayName: 'Get Version'
 
   - script: |
@@ -63,5 +64,5 @@ steps:
   - task: PublishBuildArtifacts@1
     displayName: 'Publish Artifact'
     inputs:
-      PathtoPublish: '$(Build.ArtifactStagingDirectory)'
+      PathtoPublish: '$(System.DefaultWorkingDirectory)/build$(VersionNumber).zip'
       ArtifactName: 'drop'

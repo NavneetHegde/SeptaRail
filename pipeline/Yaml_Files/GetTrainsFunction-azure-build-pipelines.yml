@@ -66,10 +66,10 @@ steps:
     inputs:
       rootFolderOrFile: "$(System.DefaultWorkingDirectory)/publish_output"
       includeRootFolder: false
-      archiveFile: "$(System.DefaultWorkingDirectory)/build$(VersionNumber).zip"
+      archiveFile: "$(System.DefaultWorkingDirectory)/build$(FullSemVer).zip"
 
   - task: PublishBuildArtifacts@1
     displayName: 'Publish Artifact'
     inputs:
-      PathtoPublish: '$(System.DefaultWorkingDirectory)/build$(VersionNumber).zip'
+      PathtoPublish: '$(System.DefaultWorkingDirectory)/build$(FullSemVer).zip'
       ArtifactName: 'drop'

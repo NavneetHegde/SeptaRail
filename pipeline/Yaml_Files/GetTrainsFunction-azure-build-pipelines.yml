@@ -41,7 +41,7 @@ steps:
   - script: git add .
     displayName: 'Stage Changes'
 
-  - script: git commit -m "Update version to $($VersionNumber)"
+  - script: git commit -m "Update version to $(VersionNumber)"
     displayName: 'Commit Changes'
 
   - task: UseDotNet@2

@@ -2,7 +2,7 @@ pr:
   branches:
    include:
      - master
-     - release
+     
   paths:
    include:
      - 'src/GetTrainsFunction/GetTrainsFunction.csproj'
@@ -31,7 +31,25 @@ steps:
   - task: CmdLine@2
     displayName: 'Generate Version'
     inputs:
-      script: 'dotnet-gitversion /output buildserver /nofetch /updateprojectfiles'
+      script: 'dotnet-gitversion /output buildserver /nofetch'
+
+- powershell: |
+      $version = $(GitVersion.SemVer)
+      $csprojPath = 'src/GetTrainsFunction/GetTrainsFunction.csproj'
+      $csprojContent = Get-Content $csprojPath
+      $csprojContent -replace '<Version>.*</Version>', "<Version>$(GitVersion.SemVer)</Version>" | Set-Content $csprojPath
+    displayName: 'Update .csproj File'
+
+  - script: |
+     git config --global user.email "navneet.hegde@hotmail.com"
+     git config --global user.name "Navneet Hegde"
+    displayName: 'Set Git Config'
+
+  - script: git add .
+    displayName: 'Stage Changes'
+
+  - script: git commit -m "Update version to $(GitVersion.SemVer)"
+    displayName: 'Commit Changes'
 
   - task: DotNetCoreCLI@2
     displayName: 'Build and Publish'

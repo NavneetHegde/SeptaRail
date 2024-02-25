@@ -33,8 +33,14 @@ steps:
       $csprojContent -replace '<Version>.*</Version>', "<Version>$($version.Version)</Version>" | Set-Content $csprojPath
     displayName: 'Update .csproj File'
 
+  - script: |
+     git config --global user.email "navneet.hegde@hotmail.com"
+     git config --global user.name "Navneet Hegde"
+    displayName: 'Set Git Config'
+
   - script: git add .
     displayName: 'Stage Changes'
+
   - script: git commit -m "Update version to $($VersionNumber)"
     displayName: 'Commit Changes'
 

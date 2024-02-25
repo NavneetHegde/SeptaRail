@@ -15,6 +15,11 @@ variables:
 
 
 steps:
+  - task: UseDotNet@2
+    inputs:
+      version: '8.x'
+      includePreviewVersions: true # Required for preview versions
+
   - script: git fetch --unshallow
     displayName: 'Fetch Full History'
 
@@ -22,12 +27,12 @@ steps:
     displayName: 'Install GitVersion'
 
   - script: |
-      dotnet-gitversion /output buildserver /showvariable FullSemVer
+      gitversion /output buildserver /showvariable FullSemVer
       echo "##vso[task.setvariable variable=FullSemVer]$(FullSemVer)"
     displayName: 'Generate Version'
 
   - powershell: |
-      $version = dotnet-gitversion /output buildserver
+      $version = gitversion /output buildserver
       $csprojPath = 'src/GetTrainsFunction/GetTrainsFunction.csproj'
       $csprojContent = Get-Content $csprojPath
       $csprojContent -replace '<Version>.*</Version>', "<Version>$($FullSemVer)</Version>" | Set-Content $csprojPath
@@ -43,11 +48,6 @@ steps:
 
   - script: git commit -m "Update version to $(FullSemVer)"
     displayName: 'Commit Changes'
-
-  - task: UseDotNet@2
-    inputs:
-      version: '8.x'
-      includePreviewVersions: true # Required for preview versions
 
   - task: DotNetCoreCLI@2
     displayName: 'Build and Publish'

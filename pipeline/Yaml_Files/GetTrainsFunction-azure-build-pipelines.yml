@@ -23,21 +23,21 @@ steps:
   - script: git fetch --unshallow
     displayName: 'Fetch Full History'
 
-  - script: dotnet tool install --global GitVersion.Tool --version 5.*
+  - task: CmdLine@2
     displayName: 'Install GitVersion'
+    inputs:
+      script: 'dotnet tool install --global GitVersion.Tool --version 5.10.0'
 
-  - script: |
-      dotnet-gitversion /output buildserver /showvariable SemVer /updateprojectfiles
-      echo "##vso[task.setvariable variable=FullSemVer]$(GitVersion.SemVer)"
-      echo Version $(GitVersion.SemVer)
-      echo Variable Version $(GitVersion.FullSemVer)
+  - task: CmdLine@2
     displayName: 'Generate Version'
+    inputs:
+      script: 'dotnet-gitversion /output buildserver /nofetch'
 
   - powershell: |
-      $version = dotnet-gitversion /output buildserver
+      $version = $(GitVersion.SemVer)
       $csprojPath = 'src/GetTrainsFunction/GetTrainsFunction.csproj'
       $csprojContent = Get-Content $csprojPath
-      $csprojContent -replace '<Version>.*</Version>', "<Version>$($FullSemVer)</Version>" | Set-Content $csprojPath
+      $csprojContent -replace '<Version>.*</Version>', "<Version>$(GitVersion.AssemblySemVer)</Version>" | Set-Content $csprojPath
     displayName: 'Update .csproj File'
 
   - script: |
@@ -48,7 +48,7 @@ steps:
   - script: git add .
     displayName: 'Stage Changes'
 
-  - script: git commit -m "Update version to $(FullSemVer)"
+  - script: git commit -m "Update version to $(GitVersion.SemVer)"
     displayName: 'Commit Changes'
 
   - task: DotNetCoreCLI@2
@@ -81,10 +81,10 @@ steps:
     inputs:
       rootFolderOrFile: "$(System.DefaultWorkingDirectory)/publish_output"
       includeRootFolder: false
-      archiveFile: "$(System.DefaultWorkingDirectory)/build$(FullSemVer).zip"
+      archiveFile: "$(System.DefaultWorkingDirectory)/build$(GitVersion.SemVer).zip"
 
   - task: PublishBuildArtifacts@1
     displayName: 'Publish Artifact'
     inputs:
-      PathtoPublish: '$(System.DefaultWorkingDirectory)/build$(FullSemVer).zip'
+      PathtoPublish: '$(System.DefaultWorkingDirectory)/build$(GitVersion.SemVer).zip'
       ArtifactName: 'drop'

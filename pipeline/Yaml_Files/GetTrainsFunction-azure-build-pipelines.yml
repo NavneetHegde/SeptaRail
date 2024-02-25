@@ -23,16 +23,16 @@ steps:
   - script: git fetch --unshallow
     displayName: 'Fetch Full History'
 
-  - script: dotnet tool install --global GitVersion.Tool
+  - script: dotnet tool install --global GitVersion.Tool --version 5.*
     displayName: 'Install GitVersion'
 
   - script: |
-      dotnet-gitversion /output buildserver /showvariable SemVer
+      GitVersion /output buildserver /showvariable SemVer
       echo "##vso[task.setvariable variable=FullSemVer]$(SemVer)"
     displayName: 'Generate Version'
 
   - powershell: |
-      $version = dotnet-gitversion /output buildserver
+      $version = GitVersion /output buildserver
       $csprojPath = 'src/GetTrainsFunction/GetTrainsFunction.csproj'
       $csprojContent = Get-Content $csprojPath
       $csprojContent -replace '<Version>.*</Version>', "<Version>$($FullSemVer)</Version>" | Set-Content $csprojPath

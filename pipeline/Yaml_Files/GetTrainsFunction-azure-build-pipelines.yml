@@ -28,9 +28,9 @@ steps:
 
   - script: |
       dotnet-gitversion /output buildserver /showvariable SemVer /updateprojectfiles
-      echo "##vso[task.setvariable variable=FullSemVer]$(SemVer)"
-      echo Version '$(SemVer)'
-      echo Variable Version '$(FullSemVer)'
+      echo "##vso[task.setvariable variable=FullSemVer]$(GitVersion.SemVer)"
+      echo Version '$(GitVersion.SemVer)'
+      echo Variable Version '$(GitVersion.FullSemVer)'
     displayName: 'Generate Version'
 
   - powershell: |

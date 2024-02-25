@@ -33,7 +33,7 @@ steps:
     inputs:
       script: 'dotnet-gitversion /output buildserver /nofetch'
 
-- powershell: |
+  - powershell: |
       $version = $(GitVersion.SemVer)
       $csprojPath = 'src/GetTrainsFunction/GetTrainsFunction.csproj'
       $csprojContent = Get-Content $csprojPath

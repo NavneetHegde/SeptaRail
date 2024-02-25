@@ -31,25 +31,7 @@ steps:
   - task: CmdLine@2
     displayName: 'Generate Version'
     inputs:
-      script: 'dotnet-gitversion /output buildserver /nofetch'
-
-  - powershell: |
-      $version = $(GitVersion.SemVer)
-      $csprojPath = 'src/GetTrainsFunction/GetTrainsFunction.csproj'
-      $csprojContent = Get-Content $csprojPath
-      $csprojContent -replace '<Version>.*</Version>', "<Version>$(GitVersion.AssemblySemVer)</Version>" | Set-Content $csprojPath
-    displayName: 'Update .csproj File'
-
-  - script: |
-     git config --global user.email "navneet.hegde@hotmail.com"
-     git config --global user.name "Navneet Hegde"
-    displayName: 'Set Git Config'
-
-  - script: git add .
-    displayName: 'Stage Changes'
-
-  - script: git commit -m "Update version to $(GitVersion.SemVer)"
-    displayName: 'Commit Changes'
+      script: 'dotnet-gitversion /output buildserver /nofetch /updateprojectfiles'
 
   - task: DotNetCoreCLI@2
     displayName: 'Build and Publish'

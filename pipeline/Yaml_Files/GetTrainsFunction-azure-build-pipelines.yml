@@ -27,7 +27,7 @@ steps:
     displayName: 'Install GitVersion'
 
   - script: |
-      dotnet-gitversion /output buildserver /showvariable FullSemVer
+      dotnet-gitversion /output buildserver /showvariable SemVer
       echo "##vso[task.setvariable variable=FullSemVer]$(SemVer)"
     displayName: 'Generate Version'
 

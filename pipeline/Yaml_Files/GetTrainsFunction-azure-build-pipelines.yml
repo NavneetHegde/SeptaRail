@@ -1,11 +1,24 @@
-pr:
+trigger:
+  branches:
+    exclude:
+      - '*'
+pr:  
   branches:
    include:
-     - master
-     
+     - release/*
+   sourceBranch:
+     - refs/heads/release/*
+   targetBranch:
+     - refs/heads/release/*
+ 
   paths:
    include:
-     - 'src/GetTrainsFunction/GetTrainsFunction.csproj'
+     - 'src/GetTrainsFunction/*'
+   exclude:
+     - README.md
+
+  drafts: false
+  
 
 pool:
   vmImage: windows-latest
@@ -34,10 +47,10 @@ steps:
       script: 'dotnet-gitversion /output buildserver /nofetch'
 
   - powershell: |
-      $version = $(GitVersion.SemVer)
+      $version = $(GitVersion.MajorMinorPatch)
       $csprojPath = 'src/GetTrainsFunction/GetTrainsFunction.csproj'
       $csprojContent = Get-Content $csprojPath
-      $csprojContent -replace '<Version>.*</Version>', "<Version>$(GitVersion.SemVer)</Version>" | Set-Content $csprojPath
+      $csprojContent -replace '<Version>.*</Version>', "<Version>$(GitVersion.MajorMinorPatch)</Version>" | Set-Content $csprojPath
     displayName: 'Update .csproj File'
 
   - script: |
@@ -48,7 +61,7 @@ steps:
   - script: git add .
     displayName: 'Stage Changes'
 
-  - script: git commit -m "Update version to $(GitVersion.SemVer)"
+  - script: git commit -m "Update version to $(GitVersion.MajorMinorPatch)"
     displayName: 'Commit Changes'
 
   - task: DotNetCoreCLI@2
@@ -81,10 +94,10 @@ steps:
     inputs:
       rootFolderOrFile: "$(System.DefaultWorkingDirectory)/publish_output"
       includeRootFolder: false
-      archiveFile: "$(System.DefaultWorkingDirectory)/build$(GitVersion.SemVer).zip"
+      archiveFile: "$(System.DefaultWorkingDirectory)/build$(GitVersion.MajorMinorPatch).zip"
 
   - task: PublishBuildArtifacts@1
     displayName: 'Publish Artifact'
     inputs:
-      PathtoPublish: '$(System.DefaultWorkingDirectory)/build$(GitVersion.SemVer).zip'
+      PathtoPublish: '$(System.DefaultWorkingDirectory)/build$(GitVersion.MajorMinorPatch).zip'
       ArtifactName: 'drop'

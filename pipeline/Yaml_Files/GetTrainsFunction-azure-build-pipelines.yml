@@ -6,10 +6,6 @@ pr:
   branches:
    include:
      - release/*
-   sourceBranch:
-     - refs/heads/release/*
-   targetBranch:
-     - refs/heads/release/*
  
   paths:
    include:
@@ -18,7 +14,6 @@ pr:
      - README.md
 
   drafts: false
-  
 
 pool:
   vmImage: windows-latest

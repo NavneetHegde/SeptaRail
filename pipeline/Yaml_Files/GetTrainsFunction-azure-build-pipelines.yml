@@ -2,6 +2,9 @@ trigger:
   branches:
     exclude:
       - '*'
+    include:
+      - 'release/*'
+
 pr:  
   branches:
    include:
@@ -42,10 +45,10 @@ steps:
       script: 'dotnet-gitversion /output buildserver /nofetch'
 
   - powershell: |
-      $version = $(GitVersion.MajorMinorPatch)
+      $version = $(GitVersion.AssemblySemVer)
       $csprojPath = 'src/GetTrainsFunction/GetTrainsFunction.csproj'
       $csprojContent = Get-Content $csprojPath
-      $csprojContent -replace '<Version>.*</Version>', "<Version>$(GitVersion.MajorMinorPatch)</Version>" | Set-Content $csprojPath
+      $csprojContent -replace '<Version>.*</Version>', "<Version>$(GitVersion.AssemblySemVer)</Version>" | Set-Content $csprojPath
     displayName: 'Update .csproj File'
 
   - script: |
@@ -89,10 +92,10 @@ steps:
     inputs:
       rootFolderOrFile: "$(System.DefaultWorkingDirectory)/publish_output"
       includeRootFolder: false
-      archiveFile: "$(System.DefaultWorkingDirectory)/build$(GitVersion.MajorMinorPatch).zip"
+      archiveFile: "$(System.DefaultWorkingDirectory)/buildv$(GitVersion.MajorMinorPatch).zip"
 
   - task: PublishBuildArtifacts@1
     displayName: 'Publish Artifact'
     inputs:
-      PathtoPublish: '$(System.DefaultWorkingDirectory)/build$(GitVersion.MajorMinorPatch).zip'
+      PathtoPublish: '$(System.DefaultWorkingDirectory)/buildv$(GitVersion.MajorMinorPatch).zip'
       ArtifactName: 'drop'

@@ -42,14 +42,14 @@ steps:
   - task: CmdLine@2
     displayName: 'Generate Version'
     inputs:
-      script: 'dotnet-gitversion /output buildserver /nofetch'
+      script: 'dotnet-gitversion /output buildserver /updateprojectfiles /overrideconfig assembly-versioning-format="{Major}.{Minor}.{Patch}.{env:BUILD_NUMBER ?? 0}" /nofetch'
 
 
   - task: DotNetCoreCLI@2
     displayName: 'Build and Publish'
     inputs:
       command: publish
-      arguments: '--configuration $(buildConfiguration) /p:Version=$(GitVersion.AssemblySemVer).$(Build.BuildNumber) --output publish_output'
+      arguments: '--configuration $(buildConfiguration) --output publish_output'
       projects: 'src/GetTrainsFunction/GetTrainsFunction.csproj'
       publishWebProjects: false
       modifyOutputPath: false
@@ -75,10 +75,10 @@ steps:
     inputs:
       rootFolderOrFile: "$(System.DefaultWorkingDirectory)/publish_output"
       includeRootFolder: false
-      archiveFile: "$(System.DefaultWorkingDirectory)/GetTrainFunction_v$(GitVersion.MajorMinorPatch).$(Build.BuildNumber).zip"
+      archiveFile: "$(System.DefaultWorkingDirectory)/GetTrainFunction_v$(GitVersion.MajorMinorPatch).zip"
 
   - task: PublishBuildArtifacts@1
     displayName: 'Publish Artifact'
     inputs:
-      PathtoPublish: '$(System.DefaultWorkingDirectory)/GetTrainFunction_v$(GitVersion.MajorMinorPatch).$(Build.BuildNumber).zip'
+      PathtoPublish: '$(System.DefaultWorkingDirectory)/GetTrainFunction_v$(GitVersion.MajorMinorPatch).zip'
       ArtifactName: 'drop'

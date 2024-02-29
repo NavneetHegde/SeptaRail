@@ -49,7 +49,7 @@ steps:
     inputs:
       targetType: 'inline'
       script: |
-        (Get-Content GetTrainsFunction.csproj) -Replace '\.\d+</Version>', '.$(GitVersion.AssemblySemVer)</Version>' | Out-File GetTrainsFunction.csproj
+        (Get-Content src/GetTrainsFunction/GetTrainsFunction.csproj) -Replace '\.\d+</Version>', '.$(GitVersion.AssemblySemVer)</Version>' | Out-File src/GetTrainsFunction/GetTrainsFunction.csproj
 
   - task: DotNetCoreCLI@2
     displayName: 'Build and Publish'

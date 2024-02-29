@@ -22,8 +22,7 @@ pool:
   vmImage: windows-latest
 
 variables:
-  buildConfiguration: 'Release'
-  GitVersion.SemVer: ''
+  buildConfiguration: 'Release' 
 
 
 steps:
@@ -35,10 +34,16 @@ steps:
   - script: git fetch --unshallow
     displayName: 'Fetch Full History'
 
-  - task: UseGitVersion@5
-    displayName: 'Get Version'
+  - task: CmdLine@2
+    displayName: 'Install GitVersion'
     inputs:
-      versionSpec: '5.x'
+      script: 'dotnet tool install --global GitVersion.Tool --version 5.10.0'
+
+  - task: CmdLine@2
+    displayName: 'Generate Version'
+    inputs:
+      script: 'dotnet-gitversion /output buildserver /nofetch'
+
 
   - task: DotNetCoreCLI@2
     displayName: 'Build and Publish'

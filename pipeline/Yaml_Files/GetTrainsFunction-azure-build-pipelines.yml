@@ -23,6 +23,7 @@ pool:
 
 variables:
   buildConfiguration: 'Release'
+  GitVersion.SemVer: ''
 
 
 steps:
@@ -34,28 +35,16 @@ steps:
   - script: git fetch --unshallow
     displayName: 'Fetch Full History'
 
-  - task: CmdLine@2
-    displayName: 'Install GitVersion'
+  - task: UseGitVersion@5
+    displayName: 'Get Version'
     inputs:
-      script: 'dotnet tool install --global GitVersion.Tool --version 5.10.0'
-
-  - task: CmdLine@2
-    displayName: 'Generate Version'
-    inputs:
-      script: 'dotnet-gitversion /output buildserver /nofetch'
-
-  - task: PowerShell@2
-    displayName : 'Update Version'
-    inputs:
-      targetType: 'inline'
-      script: |
-        (Get-Content src/GetTrainsFunction/GetTrainsFunction.csproj) -Replace '(?<=<Version>).*?(?=<\/Version>)', '$(GitVersion.AssemblySemVer)' | Out-File src/GetTrainsFunction/GetTrainsFunction.csproj
+      versionSpec: '5.x'
 
   - task: DotNetCoreCLI@2
     displayName: 'Build and Publish'
     inputs:
       command: publish
-      arguments: '--configuration $(buildConfiguration) --output publish_output'
+      arguments: '--configuration $(buildConfiguration) /p:Version=$(GitVersion.AssemblySemVer) --output publish_output'
       projects: 'src/GetTrainsFunction/GetTrainsFunction.csproj'
       publishWebProjects: false
       modifyOutputPath: false

@@ -44,23 +44,12 @@ steps:
     inputs:
       script: 'dotnet-gitversion /output buildserver /nofetch'
 
-  - powershell: |
-      $version = $(GitVersion.AssemblySemVer)
-      $csprojPath = 'src/GetTrainsFunction/GetTrainsFunction.csproj'
-      $csprojContent = Get-Content $csprojPath
-      $csprojContent -replace '<Version>.*</Version>', "<Version>$(GitVersion.AssemblySemVer)</Version>" | Set-Content $csprojPath
-    displayName: 'Update .csproj File'
-
-  - script: |
-     git config --global user.email "navneet.hegde@hotmail.com"
-     git config --global user.name "Navneet Hegde"
-    displayName: 'Set Git Config'
-
-  - script: git add .
-    displayName: 'Stage Changes'
-
-  - script: git commit -m "Update version to $(GitVersion.MajorMinorPatch)"
-    displayName: 'Commit Changes'
+  - task: PowerShell@2
+    displayName : 'Update Version'
+    inputs:
+      targetType: 'inline'
+      script: |
+        (Get-Content GetTrainsFunction.csproj) -Replace '\.\d+</Version>', '.$(GitVersion.AssemblySemVer)</Version>' | Out-File GetTrainsFunction.csproj
 
   - task: DotNetCoreCLI@2
     displayName: 'Build and Publish'
@@ -92,10 +81,10 @@ steps:
     inputs:
       rootFolderOrFile: "$(System.DefaultWorkingDirectory)/publish_output"
       includeRootFolder: false
-      archiveFile: "$(System.DefaultWorkingDirectory)/buildv$(GitVersion.MajorMinorPatch).zip"
+      archiveFile: "$(System.DefaultWorkingDirectory)/GetTrainFunction_v$(GitVersion.MajorMinorPatch).zip"
 
   - task: PublishBuildArtifacts@1
     displayName: 'Publish Artifact'
     inputs:
-      PathtoPublish: '$(System.DefaultWorkingDirectory)/buildv$(GitVersion.MajorMinorPatch).zip'
+      PathtoPublish: '$(System.DefaultWorkingDirectory)/GetTrainFunction_v$(GitVersion.MajorMinorPatch).zip'
       ArtifactName: 'drop'

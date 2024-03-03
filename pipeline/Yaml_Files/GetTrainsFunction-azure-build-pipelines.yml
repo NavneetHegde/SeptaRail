@@ -50,7 +50,7 @@ steps:
     displayName: 'Build and Publish'
     inputs:
       command: publish
-      arguments: '--configuration $(buildConfiguration) --output $(Build.ArtifactStagingDirectory)/$(buildConfiguration)'
+      arguments: '--configuration $(buildConfiguration) /p:Version=$(GitVersion.AssemblySemVer) --output publish_output'
       projects: 'src/GetTrainsFunction/GetTrainsFunction.csproj'
       publishWebProjects: false
       modifyOutputPath: false

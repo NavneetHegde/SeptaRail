@@ -70,6 +70,18 @@ steps:
     inputs:
       codeCoverageTool: 'Cobertura'
       summaryFileLocation: '$(Agent.TempDirectory)/**/coverage.cobertura.xml'
+  - task: ArchiveFiles@2
+    displayName: "Archive Files"
+    inputs:
+      rootFolderOrFile: "$(System.DefaultWorkingDirectory)/publish_output"
+      includeRootFolder: false
+      archiveFile: "$(System.DefaultWorkingDirectory)/GetTrainFunction_v$(GitVersion.MajorMinorPatch).$(Build.BuildNumber).zip"
+
+  - task: PublishBuildArtifacts@1
+    displayName: 'Publish Artifact'
+    inputs:
+      PathtoPublish: '$(System.DefaultWorkingDirectory)/GetTrainFunction_v$(GitVersion.MajorMinorPatch).$(Build.BuildNumber).zip'
+      ArtifactName: 'drop'
 
   - task: AzureFunctionApp@2
     displayName: 'Deploy Az Function'
@@ -77,5 +89,5 @@ steps:
       connectedServiceNameARM: 'Pay-As-You-Go(02f0931f-cb91-490a-b447-81f5b3e6f79e)'
       appType: 'functionApp'
       appName: 'GetTrainFunction'
-      package: '$(Build.ArtifactStagingDirectory)/$(buildConfiguration)/*.zip'
+      package: '$(System.DefaultWorkingDirectory)/GetTrainFunction_v$(GitVersion.MajorMinorPatch).$(Build.BuildNumber).zip'
       deploymentMethod: 'auto'

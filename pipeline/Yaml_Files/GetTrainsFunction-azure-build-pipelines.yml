@@ -21,6 +21,7 @@ pr:
 pool:
   vmImage: windows-latest
 
+
 variables:
   buildConfiguration: 'Release' 
 
@@ -70,11 +71,10 @@ steps:
       codeCoverageTool: 'Cobertura'
       summaryFileLocation: '$(Agent.TempDirectory)/**/coverage.cobertura.xml'
 
-  - task: AzureFunctionApp@1
+  - task: AzureFunctionApp@2
     inputs:
-      azureSubscription: 'AzureServiceConnection'
+      connectedServiceNameARM: 'Pay-As-You-Go(02f0931f-cb91-490a-b447-81f5b3e6f79e)'
       appType: 'functionApp'
-      appName: 'OrderApiMessagingReceive' # replace with the name of your Azure Function
-      package: '$(Build.ArtifactStagingDirectory)/**/*.zip'
-    displayName: Deploy Azure Function
-    condition: and(succeeded(), ne(variables['Build.Reason'], 'PullRequest'))
+      appName: 'GetTrainFunction'
+      package: '$(System.DefaultWorkingDirectory)/**/*.zip'
+      deploymentMethod: 'auto'

@@ -72,9 +72,10 @@ steps:
       summaryFileLocation: '$(Agent.TempDirectory)/**/coverage.cobertura.xml'
 
   - task: AzureFunctionApp@2
+    displayName: 'Deploy Az Function'
     inputs:
       connectedServiceNameARM: 'Pay-As-You-Go(02f0931f-cb91-490a-b447-81f5b3e6f79e)'
       appType: 'functionApp'
       appName: 'GetTrainFunction'
-      package: '$(System.DefaultWorkingDirectory)/**/*.zip'
+      package: '$(Build.ArtifactStagingDirectory)/$(buildConfiguration)/*.zip'
       deploymentMethod: 'auto'

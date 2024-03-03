@@ -49,7 +49,7 @@ steps:
     displayName: 'Build and Publish'
     inputs:
       command: publish
-      arguments: '--configuration $(buildConfiguration) --output publish_output'
+      arguments: '--configuration $(buildConfiguration) --output $(Build.ArtifactStagingDirectory)/$(buildConfiguration)'
       projects: 'src/GetTrainsFunction/GetTrainsFunction.csproj'
       publishWebProjects: false
       modifyOutputPath: false
@@ -70,15 +70,11 @@ steps:
       codeCoverageTool: 'Cobertura'
       summaryFileLocation: '$(Agent.TempDirectory)/**/coverage.cobertura.xml'
 
-  - task: ArchiveFiles@2
-    displayName: "Archive Files"
+  - task: AzureFunctionApp@1
     inputs:
-      rootFolderOrFile: "$(System.DefaultWorkingDirectory)/publish_output"
-      includeRootFolder: false
-      archiveFile: "$(System.DefaultWorkingDirectory)/GetTrainFunction_v$(GitVersion.MajorMinorPatch).zip"
-
-  - task: PublishBuildArtifacts@1
-    displayName: 'Publish Artifact'
-    inputs:
-      PathtoPublish: '$(System.DefaultWorkingDirectory)/GetTrainFunction_v$(GitVersion.MajorMinorPatch).zip'
-      ArtifactName: 'drop'
+      azureSubscription: 'AzureServiceConnection'
+      appType: 'functionApp'
+      appName: 'OrderApiMessagingReceive' # replace with the name of your Azure Function
+      package: '$(Build.ArtifactStagingDirectory)/**/*.zip'
+    displayName: Deploy Azure Function
+    condition: and(succeeded(), ne(variables['Build.Reason'], 'PullRequest'))

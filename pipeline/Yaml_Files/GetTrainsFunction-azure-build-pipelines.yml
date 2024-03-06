@@ -21,6 +21,7 @@ pr:
 pool:
   vmImage: windows-latest
 
+
 variables:
   buildConfiguration: 'Release' 
 
@@ -49,7 +50,7 @@ steps:
     displayName: 'Build and Publish'
     inputs:
       command: publish
-      arguments: '--configuration $(buildConfiguration) --output $(Build.ArtifactStagingDirectory)/$(buildConfiguration)'
+      arguments: '--configuration $(buildConfiguration) /p:Version=$(GitVersion.AssemblySemVer) --output publish_output'
       projects: 'src/GetTrainsFunction/GetTrainsFunction.csproj'
       publishWebProjects: false
       modifyOutputPath: false
@@ -69,12 +70,24 @@ steps:
     inputs:
       codeCoverageTool: 'Cobertura'
       summaryFileLocation: '$(Agent.TempDirectory)/**/coverage.cobertura.xml'
-
-  - task: AzureFunctionApp@1
+  - task: ArchiveFiles@2
+    displayName: "Archive Files"
     inputs:
-      azureSubscription: 'AzureServiceConnection'
+      rootFolderOrFile: "$(System.DefaultWorkingDirectory)/publish_output"
+      includeRootFolder: false
+      archiveFile: "$(System.DefaultWorkingDirectory)/GetTrainFunction_v$(GitVersion.MajorMinorPatch).$(Build.BuildNumber).zip"
+
+  - task: PublishBuildArtifacts@1
+    displayName: 'Publish Artifact'
+    inputs:
+      PathtoPublish: '$(System.DefaultWorkingDirectory)/GetTrainFunction_v$(GitVersion.MajorMinorPatch).$(Build.BuildNumber).zip'
+      ArtifactName: 'drop'
+
+  - task: AzureFunctionApp@2
+    displayName: 'Deploy Az Function'
+    inputs:
+      connectedServiceNameARM: 'Pay-As-You-Go(02f0931f-cb91-490a-b447-81f5b3e6f79e)'
       appType: 'functionApp'
-      appName: 'OrderApiMessagingReceive' # replace with the name of your Azure Function
-      package: '$(Build.ArtifactStagingDirectory)/**/*.zip'
-    displayName: Deploy Azure Function
-    condition: and(succeeded(), ne(variables['Build.Reason'], 'PullRequest'))
+      appName: 'GetTrainFunction'
+      package: '$(System.DefaultWorkingDirectory)/GetTrainFunction_v$(GitVersion.MajorMinorPatch).$(Build.BuildNumber).zip'
+      deploymentMethod: 'auto'

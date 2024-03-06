@@ -1,0 +1,43 @@
+@Path=api/NextThreeTrainFunction
+
+# Testing Request
+POST {{HostAddress}}/{{Path}}{{ApiKey}}
+Content-Type: application/json
+Accept-Language: en-US,en;q=0.5
+
+{
+    "From": "Radnor",
+    "To": "30th Street Station"
+}
+
+###
+# Testing Empty Station Request
+POST {{HostAddress}}/{{Path}}{{ApiKey}}
+Content-Type: application/json
+Accept-Language: en-US,en;q=0.5
+
+{
+    "From": "null",
+    "To": "null"
+}
+###
+# Testing Null Station Request
+POST {{HostAddress}}/{{Path}}{{ApiKey}}
+Content-Type: application/json
+Accept-Language: en-US,en;q=0.5
+
+{
+    "From": "",
+    "To": ""
+}
+
+###
+# Testing Non Existing Station Request
+POST {{HostAddress}}/{{Path}}{{ApiKey}}
+Content-Type: application/json
+Accept-Language: en-US,en;q=0.5
+
+{
+    "From": "Test",
+    "To": "Test"
+}

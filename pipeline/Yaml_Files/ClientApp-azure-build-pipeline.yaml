@@ -1,0 +1,40 @@
+trigger:
+  branches:
+    exclude:
+      - '*'
+    include:
+      - 'release/*'
+
+pr:  
+  branches:
+   include:
+     - release/*
+ 
+  paths:
+   include:
+     - 'src/ClientApp/*'
+   exclude:
+     - README.md
+
+  drafts: false
+
+pool:
+  vmImage: macos-latest
+  demands: xcode
+
+variables:
+  buildConfiguration: 'Release' 
+
+steps:
+  - task: UseDotNet@2
+    displayName: 'Install .NET SDK'
+    inputs:
+      packageType: sdk
+      version: '8.x'
+      installationPath: $(Agent.ToolsDirectory)/dotnet
+      includePreviewVersions: true # Required for preview versions
+
+  - task: CmdLine@2
+    displayName: 'Install Maui Workload'
+    inputs:
+      script: 'dotnet workload install maui'

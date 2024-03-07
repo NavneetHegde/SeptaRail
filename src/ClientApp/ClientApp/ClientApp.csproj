@@ -25,7 +25,7 @@
 		<ApplicationTitle>ClientApp</ApplicationTitle>
 
 		<!-- App Identifier -->
-		<ApplicationId>com.companyname.clientapp</ApplicationId>
+		<ApplicationId>com.navneethegde.septarail</ApplicationId>
 
 		<!-- Versions -->
 		<ApplicationDisplayVersion>1.0</ApplicationDisplayVersion>

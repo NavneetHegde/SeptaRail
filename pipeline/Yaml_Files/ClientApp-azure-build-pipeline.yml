@@ -59,7 +59,7 @@ steps:
     inputs:
       command: 'publish'
       publishWebProjects: false
-      projects: '**/src/ClientApp/ClientApp.csproj'
+      projects: '**/src/ClientApp/ClientApp.sln'
       arguments: '-f:$(iOSVersion) -c:Release /p:ArchiveOnBuild=true /p:EnableAssemblyILStripping=false'
       zipAfterPublish: false
 

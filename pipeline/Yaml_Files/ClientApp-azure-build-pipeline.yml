@@ -24,13 +24,15 @@ pool:
 
 variables:
   buildConfiguration: 'Release' 
+  DotNetVersion: 8.x
+  iOSVersion: net8.0-ios
 
 steps:
   - task: UseDotNet@2
     displayName: 'Install .NET SDK'
     inputs:
       packageType: sdk
-      version: '8.x'
+      version: $(DotNetVersion)
       installationPath: $(Agent.ToolsDirectory)/dotnet
       includePreviewVersions: true # Required for preview versions
 
@@ -38,3 +40,41 @@ steps:
     displayName: 'Install Maui Workload'
     inputs:
       script: 'dotnet workload install maui'
+
+  - task: InstallAppleCertificate@2
+    displayName: 'Install Apple P12 Cert'
+    inputs:
+      certSecureFile: 'Certificates.p12'
+      certPwd: '$(p12CertPWD)'
+      keychain: 'temp'
+
+  - task: InstallAppleProvisioningProfile@1
+    displayName: 'Install Apple Provisioning Profile'
+    inputs:
+      provisioningProfileLocation: 'secureFiles'
+      provProfileSecureFile: 'navneethegdeseptarail.mobileprovision'
+
+  - task: DotNetCoreCLI@2
+    displayName: 'Build the iOS Binaries'
+    inputs:
+      command: 'publish'
+      publishWebProjects: false
+      projects: '**/src/ClientApp/ClientApp.sln'
+      arguments: '-f:$(iOSVersion) -c:Release /p:ArchiveOnBuild=true /p:EnableAssemblyILStripping=false'
+      zipAfterPublish: false
+
+  - task: CopyFiles@2
+    displayName: 'Copy file from Build to Staging'
+    inputs:
+      SourceFolder: '$(Agent.BuildDirectory)'
+      Contents: '**/*.ipa'
+      TargetFolder: '$(Build.ArtifactStagingDirectory)'
+      CleanTargetFolder: true
+      OverWrite: true 
+
+  - task: PublishBuildArtifacts@1
+    displayName: 'Publish the Staging Files.'
+    inputs:
+      PathtoPublish: '$(Build.ArtifactStagingDirectory)'
+      ArtifactName: 'drop'
+

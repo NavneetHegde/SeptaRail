@@ -24,13 +24,15 @@ pool:
 
 variables:
   buildConfiguration: 'Release' 
+  DotNetVersion: 8.x
+  iOSVersion: net8.0-ios
 
 steps:
   - task: UseDotNet@2
     displayName: 'Install .NET SDK'
     inputs:
       packageType: sdk
-      version: '8.x'
+      version: $(DotNetVersion)
       installationPath: $(Agent.ToolsDirectory)/dotnet
       includePreviewVersions: true # Required for preview versions
 
@@ -57,15 +59,15 @@ steps:
     inputs:
       command: 'publish'
       publishWebProjects: false
-      projects: '**/ClientApp.sln'
-      arguments: '-f:net8.0-ios -c:Release /p:ArchiveOnBuild=true /p:EnableAssemblyILStripping=false'
+      projects: '**/src/ClientApp/ClientApp.csproj'
+      arguments: '-f:$(iOSVersion) -c:Release /p:ArchiveOnBuild=true /p:EnableAssemblyILStripping=false'
       zipAfterPublish: false
 
   - task: CopyFiles@2
     displayName: 'Copy file from Build to Staging'
     inputs:
       SourceFolder: '$(Agent.BuildDirectory)'
-      Contents: '**/*'
+      Contents: '**/*.ipa'
       TargetFolder: '$(Build.ArtifactStagingDirectory)'
       CleanTargetFolder: true
       OverWrite: true 

@@ -22,10 +22,10 @@
 		<ManagePackageVersionsCentrally>false</ManagePackageVersionsCentrally>
 
 		<!-- Display name -->
-		<ApplicationTitle>ClientApp</ApplicationTitle>
+		<ApplicationTitle>SeptaRail</ApplicationTitle>
 
 		<!-- App Identifier -->
-		<ApplicationId>SeptaRail</ApplicationId>
+		<ApplicationId>com.navneethegde.septarail</ApplicationId>
 
 		<!-- Versions -->
 		<ApplicationDisplayVersion>1.0</ApplicationDisplayVersion>
@@ -124,5 +124,11 @@
 	    <Generator>MSBuild:Compile</Generator>
 	  </None>
 	</ItemGroup>
+
+	<PropertyGroup Condition="$(TargetFramework.Contains('-ios')) and '$(Configuration)' == 'Release'">
+		<RuntimeIdentifier>ios-arm64</RuntimeIdentifier>
+		<CodesignKey>Apple Development: Navneet Hegde (63C3T6B42D)</CodesignKey>
+		<CodesignProvision>navneethegde.septarail</CodesignProvision>
+	</PropertyGroup>
 
 </Project>

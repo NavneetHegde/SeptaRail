@@ -19,7 +19,7 @@ pr:
   drafts: false
 
 pool:
-  vmImage: macos-latest
+  vmImage: macos-13
   demands: xcode
 
 variables:

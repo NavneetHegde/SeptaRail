@@ -44,7 +44,7 @@ steps:
   - task: InstallAppleCertificate@2
     displayName: 'Install Apple P12 Cert'
     inputs:
-      certSecureFile: 'Certificates.p12'
+      certSecureFile: 'iOS-Distribution.p12'
       certPwd: '$(p12CertPWD)'
       keychain: 'temp'
 
@@ -52,7 +52,7 @@ steps:
     displayName: 'Install Apple Provisioning Profile'
     inputs:
       provisioningProfileLocation: 'secureFiles'
-      provProfileSecureFile: 'navneethegdeseptarail.mobileprovision'
+      provProfileSecureFile: 'iOSSeptaRailSigning.mobileprovision'
 
   - task: DotNetCoreCLI@2
     displayName: 'Build the iOS Binaries'

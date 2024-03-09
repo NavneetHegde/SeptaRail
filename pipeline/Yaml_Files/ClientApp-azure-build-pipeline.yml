@@ -52,7 +52,7 @@ steps:
     displayName: 'Install Apple Provisioning Profile'
     inputs:
       provisioningProfileLocation: 'secureFiles'
-      provProfileSecureFile: 'iOSSeptaRailSigning.mobileprovision'
+      provProfileSecureFile: 'iOSSeptaRailAdHocSigning.mobileprovision'
 
   - task: DotNetCoreCLI@2
     displayName: 'Build the iOS Binaries'

@@ -128,7 +128,7 @@
 	<PropertyGroup Condition="$(TargetFramework.Contains('-ios')) and '$(Configuration)' == 'Release'">
 		<RuntimeIdentifier>ios-arm64</RuntimeIdentifier>
 		<CodesignKey>Apple Distribution: Navneet Hegde (W9TDN6Y9K2)</CodesignKey>
-		<CodesignProvision>iOSSeptaRailSigning</CodesignProvision>
+		<CodesignProvision>iOSSeptaRailAdHocSigning</CodesignProvision>
 	</PropertyGroup>
 
 </Project>

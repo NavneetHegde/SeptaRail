@@ -1,4 +1,6 @@
-﻿namespace SeptaRail.ClientApp;
+﻿using Microsoft.Maui.Controls;
+
+namespace SeptaRail.ClientApp;
 
 public partial class App : Application
 {
@@ -7,5 +9,8 @@ public partial class App : Application
         InitializeComponent();
 
         MainPage = new AppShell();
+
     }
+
+
 }

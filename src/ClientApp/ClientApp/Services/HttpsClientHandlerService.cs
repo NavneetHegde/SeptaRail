@@ -49,7 +49,7 @@ internal sealed class CustomAndroidMessageHandler : Xamarin.Android.Net.AndroidM
     {
         if (url.StartsWith("https://localhost"))
             return true;
-        return false;
+        return true;
     }
 #endif
 }

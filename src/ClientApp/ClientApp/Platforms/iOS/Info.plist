@@ -28,5 +28,26 @@
 	</array>
 	<key>XSAppIconAssets</key>
 	<string>Assets.xcassets/appicon.appiconset</string>
+	<key>NSAppTransportSecurity</key>
+	<dict>
+		<key>NSExceptionDomains</key>
+    <dict>
+      <key>gettrainfunction.azurewebsites.net</key>
+      <dict>
+        <!-- Optional: Allow subdomains -->
+        <key>NSIncludesSubdomains</key>
+        <true/>
+        <!-- Optional: Specify minimum TLS version -->
+        <key>NSExceptionMinimumTLSVersion</key>
+        <string>TLSv1.2</string>
+        <!-- Optional: Specify exceptions to ATS policies -->
+        <key>NSExceptionAllowsInsecureHTTPLoads</key>
+        <true/>
+        <key>NSAllowsArbitraryLoads</key>
+        <true/>
+        <true/>
+      </dict>
+    </dict>
+	</dict>
 </dict>
 </plist>

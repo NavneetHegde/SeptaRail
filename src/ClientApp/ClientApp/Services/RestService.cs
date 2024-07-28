@@ -18,6 +18,7 @@ public class RestService : IRestService
 #if DEBUG
         _httpsClientHandlerService = service;
         HttpMessageHandler handler = _httpsClientHandlerService.GetPlatformMessageHandler();
+
         if (handler != null)
             _client = new HttpClient(handler);
         else
@@ -36,7 +37,7 @@ public class RestService : IRestService
     {
         Items = new List<NextTrain>();
 
-        Uri uri = new Uri(string.Format(Constants.RestUrl));
+        Uri uri = new Uri(string.Format(Constants.ProdRestUrl));
         try
         {
             string json = JsonSerializer.Serialize<NextTrainRequest>(request, _serializerOptions);

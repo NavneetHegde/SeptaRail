@@ -9,7 +9,11 @@ builder.ConfigureFunctionsWebApplication();
 
 builder.Services.AddHttpClient("httpClient", client =>
 {
-    client.BaseAddress = new Uri("http://www3.septa.org/hackathon/NextToArrive/");
+    // Base URL is configurable per environment; HTTPS by default.
+    var baseUrl = builder.Configuration["Septa:BaseUrl"]
+                  ?? "https://www3.septa.org/hackathon/NextToArrive/";
+    client.BaseAddress = new Uri(baseUrl);
+    client.DefaultRequestHeaders.Add("User-Agent", "SeptaRail-NextThreeTrainFunction");
 });
 
 builder.Build().Run();

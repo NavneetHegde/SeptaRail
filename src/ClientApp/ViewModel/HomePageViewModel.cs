@@ -14,14 +14,14 @@ namespace SeptaRail.ClientApp.ViewModel;
 public class HomePageViewModel : INotifyPropertyChanged
 {
     INextTrainFunction _nextTrainFunction;
-    public string _fromPickerSelectedTrxt;
-    public string _toPickerSelectedTrxt;
-    public event PropertyChangedEventHandler PropertyChanged;
+    public string _fromPickerSelectedTrxt = string.Empty;
+    public string _toPickerSelectedTrxt = string.Empty;
+    public event PropertyChangedEventHandler? PropertyChanged;
     private DateTime _dateTime;
     private Timer _timer;
     public List<NextTrain> _nextTrains = new List<NextTrain>();
     public List<string> _stationList = new List<string>();
-    static Page Page => Application.Current?.MainPage ?? throw new NullReferenceException();
+    static Page Page => Application.Current?.Windows[0].Page ?? throw new NullReferenceException();
 
     public ICommand SearchTrainCommand { get; private set; }
 

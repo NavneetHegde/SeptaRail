@@ -2,7 +2,7 @@
 
 public class HttpsClientHandlerService : IHttpsClientHandlerService
 {
-    public HttpMessageHandler GetPlatformMessageHandler()
+    public HttpMessageHandler? GetPlatformMessageHandler()
     {
 #if ANDROID
 #if NET6_0

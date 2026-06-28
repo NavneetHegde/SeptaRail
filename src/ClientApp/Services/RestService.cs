@@ -11,13 +11,13 @@ public class RestService : IRestService
     JsonSerializerOptions _serializerOptions;
     IHttpsClientHandlerService _httpsClientHandlerService;
 
-    public List<NextTrain> Items { get; private set; }
+    public List<NextTrain> Items { get; private set; } = new();
 
     public RestService(IHttpsClientHandlerService service)
     {
 #if DEBUG
         _httpsClientHandlerService = service;
-        HttpMessageHandler handler = _httpsClientHandlerService.GetPlatformMessageHandler();
+        HttpMessageHandler? handler = _httpsClientHandlerService.GetPlatformMessageHandler();
 
         if (handler != null)
             _client = new HttpClient(handler);
@@ -47,7 +47,7 @@ public class RestService : IRestService
             if (response.IsSuccessStatusCode)
             {
                 string responseContent = await response.Content.ReadAsStringAsync();
-                Items = JsonSerializer.Deserialize<List<NextTrain>>(responseContent, _serializerOptions);
+                Items = JsonSerializer.Deserialize<List<NextTrain>>(responseContent, _serializerOptions) ?? new();
             }
         }
         catch (Exception ex)

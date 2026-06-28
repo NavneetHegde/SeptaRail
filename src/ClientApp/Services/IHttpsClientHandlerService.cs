@@ -2,5 +2,5 @@
 
 public interface IHttpsClientHandlerService
 {
-    HttpMessageHandler GetPlatformMessageHandler();
+    HttpMessageHandler? GetPlatformMessageHandler();
 }

@@ -10,6 +10,71 @@ SeptaRail shows the next three SEPTA Regional Rail trains between two stations. 
 
 The ClientApp never calls SEPTA directly — it always calls the Azure Function, which in turn calls SEPTA.
 
+## Architecture
+
+The Aspire AppHost (`AppHost/AppHost.cs`) orchestrates the system in dev — the Function, the MAUI app (iOS simulator), and a public DevTunnel — and drives publishing to Azure via the generated `infra/` Bicep. The Function shares cross-cutting concerns (OpenTelemetry, health checks, HTTP resilience) through the `ServiceDefaults` library.
+
+```mermaid
+%%{init: {'theme':'base', 'themeVariables': {'background':'#0d1117', 'lineColor':'#adbac7'}}}%%
+flowchart TB
+    subgraph Clients["Client apps — .NET MAUI (ClientApp)"]
+        direction LR
+        AND["Android"]
+        IOS["iOS"]
+        MAC["MacCatalyst"]
+        WIN["Windows"]
+    end
+
+    subgraph Dev["Local orchestration — Aspire AppHost (AppHost.cs)"]
+        direction LR
+        DASH["Aspire dashboard<br/>+ Azurite storage"]
+        DT["DevTunnel<br/>(anonymous public)"]
+        SIM["iOS simulator"]
+    end
+
+    subgraph Service["GetTrainsFunction (isolated worker)"]
+        FN["NextThreeTrainFunction<br/>POST /api · GET /api/health"]
+        SD["ServiceDefaults<br/>OTel · health · HTTP resilience"]
+        FN --- SD
+    end
+
+    SEPTA["SEPTA NextToArrive API<br/>www3.septa.org/hackathon"]
+
+    subgraph AzureDeploy["Azure — aspire publish/deploy → infra/ Bicep"]
+        direction LR
+        ACA["Container Apps env<br/>(septa-env)"]
+        FAPP["Function app<br/>(gettrains)"]
+        STG["Storage<br/>(funcstorage)"]
+        ACR["Container registry<br/>(septa-env-acr)"]
+    end
+
+    Clients -->|"HTTPS (prod)"| Service
+    Dev -. "dev: tunnels + telemetry" .-> Service
+    Service -->|"GET {from}/{to}/3"| SEPTA
+    Service -. "aspire deploy" .-> AzureDeploy
+    FAPP --- ACA
+    FAPP --- STG
+    ACA --- ACR
+
+    classDef client fill:#0969da,stroke:#0a3069,stroke-width:2px,color:#ffffff;
+    classDef dev fill:#9a6700,stroke:#5c3d00,stroke-width:2px,color:#ffffff;
+    classDef func fill:#8250df,stroke:#3b1e72,stroke-width:2px,color:#ffffff;
+    classDef ext fill:#1a7f37,stroke:#0c4a1f,stroke-width:2px,color:#ffffff;
+    classDef azure fill:#bf3989,stroke:#5e1d47,stroke-width:2px,color:#ffffff;
+    class AND,IOS,MAC,WIN client;
+    class DASH,DT,SIM dev;
+    class FN,SD func;
+    class SEPTA ext;
+    class ACA,FAPP,STG,ACR azure;
+
+    style Clients fill:#161b22,stroke:#6e7681,stroke-width:2px,color:#e6edf3;
+    style Dev fill:#161b22,stroke:#6e7681,stroke-width:2px,color:#e6edf3;
+    style Service fill:#161b22,stroke:#6e7681,stroke-width:2px,color:#e6edf3;
+    style AzureDeploy fill:#161b22,stroke:#6e7681,stroke-width:2px,color:#e6edf3;
+
+    linkStyle default stroke:#adbac7,stroke-width:2px;
+```
+
 ## Runtime data flow
 
 ```mermaid

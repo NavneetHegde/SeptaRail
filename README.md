@@ -39,6 +39,9 @@ flowchart LR
     class VM,NTF,RS client;
     class RUN,HC func;
     class SEPTA ext;
+
+    style Client fill:#eaeef2,stroke:#57606a,stroke-width:1px,color:#1f2328;
+    style Azure fill:#eaeef2,stroke:#57606a,stroke-width:1px,color:#1f2328;
 ```
 
 The Function returns specific status codes instead of swallowing errors: `400` for an empty/malformed body or missing stations, `502` when SEPTA is unreachable or returns a bad response, `499` if the caller cancels, and `500` for anything unexpected.
@@ -75,6 +78,9 @@ flowchart TD
     class push trigger;
     class FB,FD,MB,MP job;
     class AZ,ART out;
+
+    style FW fill:#eaeef2,stroke:#57606a,stroke-width:1px,color:#1f2328;
+    style MW fill:#eaeef2,stroke:#57606a,stroke-width:1px,color:#1f2328;
 ```
 
 ## Local development

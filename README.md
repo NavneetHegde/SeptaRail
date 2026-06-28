@@ -32,6 +32,13 @@ flowchart LR
     RUN -->|"GET {from}/{to}/3"| SEPTA
     SEPTA -->|"next 3 trains (JSON)"| RUN
     RUN -->|"200 / 400 / 502 / 499 / 500<br/>(ProblemDetails on error)"| RS
+
+    classDef client fill:#0969da,stroke:#0a3069,stroke-width:1px,color:#ffffff;
+    classDef func fill:#8250df,stroke:#3b1e72,stroke-width:1px,color:#ffffff;
+    classDef ext fill:#1a7f37,stroke:#0c4a1f,stroke-width:1px,color:#ffffff;
+    class VM,NTF,RS client;
+    class RUN,HC func;
+    class SEPTA ext;
 ```
 
 The Function returns specific status codes instead of swallowing errors: `400` for an empty/malformed body or missing stations, `502` when SEPTA is unreachable or returns a bad response, `499` if the caller cancels, and `500` for anything unexpected.
@@ -61,6 +68,13 @@ flowchart TD
 
     FD -->|"Bicep under infra/"| AZ["Azure: Function +<br/>storage + ACA env"]
     MP --> ART["septarail-ios artifact (.ipa)"]
+
+    classDef trigger fill:#bf3989,stroke:#5e1d47,stroke-width:1px,color:#ffffff;
+    classDef job fill:#0969da,stroke:#0a3069,stroke-width:1px,color:#ffffff;
+    classDef out fill:#1a7f37,stroke:#0c4a1f,stroke-width:1px,color:#ffffff;
+    class push trigger;
+    class FB,FD,MB,MP job;
+    class AZ,ART out;
 ```
 
 ## Local development

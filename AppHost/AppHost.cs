@@ -1,6 +1,8 @@
 #:sdk Aspire.AppHost.Sdk@13.4.6
 #:package Aspire.Hosting.Azure.Functions@13.4.6
 #:package Aspire.Hosting.Azure.AppContainers@13.4.6
+#:package Aspire.Hosting.DevTunnels@13.4.6
+#:package Aspire.Hosting.Maui@13.4.6-preview.1.26319.6
 #:project ../src/GetTrainsFunction
 #:project ../src/ClientApp
 
@@ -14,11 +16,12 @@ var gettrains = builder.AddAzureFunctionsProject<Projects.GetTrainsFunction>("ge
 
 var publicDevTunnel = builder.AddDevTunnel("devtunnel-public")
     .WithAnonymousAccess()
-    //.WithReference(weatherApi.GetEndpoint("https"));
+    .WithReference(gettrains.GetEndpoint("https"));
 
-var mauiapp = builder.AddMauiProject("mauiapp", "../ClientApp/ClientApp.csproj");
+var mauiapp = builder.AddMauiProject("mauiapp", "../src/ClientApp/ClientApp.csproj");
 
-mauiapp.AddWindowsDevice()
-    .WithReference(gettrains);
+mauiapp.AddiOSSimulator()
+    .WithOtlpDevTunnel()
+    .WithReference(gettrains, publicDevTunnel);
 
 builder.Build().Run();

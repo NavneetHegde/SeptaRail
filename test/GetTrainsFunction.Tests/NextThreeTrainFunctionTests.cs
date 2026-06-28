@@ -1,74 +1,61 @@
-using Microsoft.Azure.Functions.Worker;
-using Microsoft.Extensions.Logging;
+using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Logging.Abstractions;
 using Moq;
 using Moq.Protected;
 using System.Net;
+using System.Text;
 using System.Text.Json;
 
 namespace GetTrainsFunction.Tests;
 
 public class NextThreeTrainFunctionTests
 {
-    private MockRepository _mockRepository;
-    private Mock<HttpMessageHandler> _handlerMock;
-    private Mock<ILogger<NextThreeTrainFunction>> _mockLogger;
-    private HttpClient _magicHttpClient;
-    private Mock<ILoggerFactory> _mockLoggerFactory;
-    private Mock<IHttpClientFactory> _mockHttpClientFactory;
-    private Mock<FunctionContext> _mockContext;
+    private readonly Mock<HttpMessageHandler> _handlerMock = new(MockBehavior.Default);
+    private readonly Mock<IHttpClientFactory> _httpClientFactory = new(MockBehavior.Default);
 
-
-    public NextThreeTrainFunctionTests()
+    private static HttpRequest CreateRequest(string? body)
     {
-        _mockRepository = new(MockBehavior.Default);
-        _handlerMock = _mockRepository.Create<HttpMessageHandler>();
-        _mockLogger = _mockRepository.Create<ILogger<NextThreeTrainFunction>>();
-        _mockLoggerFactory = _mockRepository.Create<ILoggerFactory>();
-        _mockHttpClientFactory = _mockRepository.Create<IHttpClientFactory>();
-        _mockContext = new Mock<FunctionContext>();
+        var context = new DefaultHttpContext();
+        context.Request.ContentType = "application/json";
+        var bytes = Encoding.UTF8.GetBytes(body ?? string.Empty);
+        context.Request.Body = new MemoryStream(bytes);
+        context.Request.ContentLength = bytes.Length;
+        return context.Request;
     }
 
-    [Fact(Skip = "TODO Mock WriteAsJsonAsync")]
-    public async Task TestNextThreeTrainFunctionSuccess()
+    private NextThreeTrainFunction CreateSut(HttpResponseMessage? septaResponse = null)
     {
-        var mockHttpClientFactory = new Mock<IHttpClientFactory>();
-        var mockContext = new Mock<FunctionContext>();
-
-        var input = new ApiRequest { From = "StationOne", To = "StationTwo" };
-        var body = JsonSerializer.Serialize(input);
-
-        var mockRequest = new MockHttpRequestData(body);
-
-        var mockResponse = new MockHttpResponseData(mockContext.Object);
-
-        var mockLogger = new Mock<ILogger<NextThreeTrainFunction>>();
-        mockLogger.Setup(m => m.Log(LogLevel.Information,
-                It.IsAny<EventId>(),
-                It.IsAny<object>(),
-                It.IsAny<Exception>(),
-                It.IsAny<Func<object, Exception, string>>()));
-
-        var mockLoggerFactory = new Mock<ILoggerFactory>();
-        mockLoggerFactory.Setup(m => m.CreateLogger(It.IsAny<string>())).Returns(() => mockLogger.Object);
-
         _handlerMock
             .Protected()
             .Setup<Task<HttpResponseMessage>>(
                 "SendAsync",
                 ItExpr.IsAny<HttpRequestMessage>(),
-                ItExpr.IsAny<CancellationToken>()
-                )
-            .ReturnsAsync(new HttpResponseMessage
-            {
-                StatusCode = HttpStatusCode.OK,
-                Content = new StringContent("""[{"orig_train":"4370","orig_line":"West Trenton","orig_departure_time":"11:27PM","orig_arrival_time":"12:00AM","orig_delay":"On time","isdirect":"true"}]""")
-            })
-            .Verifiable();
+                ItExpr.IsAny<CancellationToken>())
+            .ReturnsAsync(septaResponse ?? new HttpResponseMessage(HttpStatusCode.OK) { Content = new StringContent("[]") });
 
-        var nextThreeTrainFunction = CreateNextThreeTrainFunction();
-        var result = await nextThreeTrainFunction.Run(mockRequest);
+        var client = new HttpClient(_handlerMock.Object) { BaseAddress = new Uri("http://septa.test/") };
+        _httpClientFactory.Setup(f => f.CreateClient("httpClient")).Returns(client);
 
-        Assert.NotNull(result);
+        return new NextThreeTrainFunction(NullLogger<NextThreeTrainFunction>.Instance, _httpClientFactory.Object);
+    }
+
+    [Fact]
+    public async Task Returns_Ok_With_Trains_On_Success()
+    {
+        var septa = new HttpResponseMessage(HttpStatusCode.OK)
+        {
+            Content = new StringContent("""[{"orig_train":"4370","orig_line":"West Trenton","orig_departure_time":"11:27PM","orig_arrival_time":"12:00AM","orig_delay":"On time","isdirect":"true"}]""")
+        };
+        var sut = CreateSut(septa);
+        var req = CreateRequest(JsonSerializer.Serialize(new ApiRequest { From = "StationOne", To = "StationTwo" }));
+
+        var result = await sut.Run(req);
+
+        var ok = Assert.IsType<OkObjectResult>(result);
+        var trains = Assert.IsAssignableFrom<List<ApiResponse>>(ok.Value);
+        Assert.Single(trains);
+        Assert.Equal("4370", trains[0].orig_train);
     }
 
     [Theory]
@@ -76,76 +63,48 @@ public class NextThreeTrainFunctionTests
     [InlineData("", "")]
     [InlineData("", null)]
     [InlineData(null, "")]
-    public async Task NextThreeTrainFunction_InvalidStationNames(string from, string to)
+    public async Task Returns_BadRequest_For_Invalid_Station_Names(string? from, string? to)
     {
-        // Arrange
-        _mockLogger.Setup(m => m.Log(LogLevel.Information,
-                It.IsAny<EventId>(),
-                It.IsAny<object>(),
-                It.IsAny<Exception>(),
-                It.IsAny<Func<object, Exception, string>>()));
+        var sut = CreateSut();
+        var req = CreateRequest(JsonSerializer.Serialize(new ApiRequest { From = from!, To = to! }));
 
-        _mockLoggerFactory.Setup(m => m.CreateLogger(It.IsAny<string>())).Returns(() => _mockLogger.Object);
+        var result = await sut.Run(req);
 
-
-        var input = new ApiRequest { From = from, To = to };
-        var body = JsonSerializer.Serialize(input);
-
-        var mockRequest = new MockHttpRequestData(body);
-        var mockResponse = new MockHttpResponseData(_mockContext.Object);
-        var nextThreeTrainFunction = CreateNextThreeTrainFunction();
-
-        // Act
-        var result = await nextThreeTrainFunction.Run(mockRequest);
-
-        // Assert
-        Assert.NotNull(result);
-        Assert.Equal(0, result.Body.Length);
-        Assert.Equal(HttpStatusCode.BadRequest, result.StatusCode);
+        Assert.IsType<BadRequestResult>(result);
     }
 
     [Fact]
-    public async Task NextThreeTrainFunction_InvalidBody()
+    public async Task Returns_BadRequest_For_Empty_Body()
     {
+        var sut = CreateSut();
+        var req = CreateRequest(string.Empty);
 
-        // Arrange
-        _mockLogger.Setup(m => m.Log(LogLevel.Information,
-                It.IsAny<EventId>(),
-                It.IsAny<object>(),
-                It.IsAny<Exception>(),
-                It.IsAny<Func<object, Exception, string>>()));
+        var result = await sut.Run(req);
 
-        _mockLoggerFactory.Setup(m => m.CreateLogger(It.IsAny<string>())).Returns(() => _mockLogger.Object);
-
-        string? body = null;
-
-        var mockRequest = new MockHttpRequestData(body);
-        var mockResponse = new MockHttpResponseData(_mockContext.Object);
-        var nextThreeTrainFunction = CreateNextThreeTrainFunction();
-
-        // Act
-        var result = await nextThreeTrainFunction.Run(mockRequest);
-
-
-        // Assert
-        Assert.NotNull(result);
-        Assert.Equal(0, result.Body.Length);
-        Assert.Equal(HttpStatusCode.ServiceUnavailable, result.StatusCode);
+        Assert.IsType<BadRequestResult>(result);
     }
 
-    #region Private
-    private NextThreeTrainFunction CreateNextThreeTrainFunction()
+    [Fact]
+    public async Task Returns_503_For_Malformed_Body()
     {
-        _magicHttpClient = new(_handlerMock.Object);
-        _mockLoggerFactory.Setup(m => m.CreateLogger(It.IsAny<string>())).Returns(() => _mockLogger.Object);
-        _mockHttpClientFactory.Setup(x => x.CreateClient("httpClient")).Returns(() =>
-        {
-            var client = _magicHttpClient;
-            client.BaseAddress = new Uri("http://ThirdPartyUri.info/");
-            return client;
-        });
-        return new(_mockLoggerFactory.Object, _mockHttpClientFactory.Object);
+        var sut = CreateSut();
+        var req = CreateRequest("{ not valid json");
+
+        var result = await sut.Run(req);
+
+        var status = Assert.IsType<StatusCodeResult>(result);
+        Assert.Equal(StatusCodes.Status503ServiceUnavailable, status.StatusCode);
     }
 
-    #endregion
+    [Fact]
+    public async Task Returns_503_When_Septa_Call_Fails()
+    {
+        var sut = CreateSut(new HttpResponseMessage(HttpStatusCode.InternalServerError));
+        var req = CreateRequest(JsonSerializer.Serialize(new ApiRequest { From = "A", To = "B" }));
+
+        var result = await sut.Run(req);
+
+        var status = Assert.IsType<StatusCodeResult>(result);
+        Assert.Equal(StatusCodes.Status503ServiceUnavailable, status.StatusCode);
+    }
 }

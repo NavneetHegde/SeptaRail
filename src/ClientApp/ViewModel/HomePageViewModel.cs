@@ -1,4 +1,6 @@
-﻿using CommunityToolkit.Maui.Views;
+﻿using CommunityToolkit.Maui;
+using CommunityToolkit.Maui.Extensions;
+using CommunityToolkit.Maui.Views;
 using SeptaRail.ClientApp.Models;
 using SeptaRail.ClientApp.Services;
 using SeptaRail.ClientApp.Views.Content;
@@ -43,7 +45,7 @@ public class HomePageViewModel : INotifyPropertyChanged
             return;
 
         var popup = new SpinnerPopup();
-        Page.ShowPopup(popup);
+        Page.ShowPopup(popup, new PopupOptions { CanBeDismissedByTappingOutsideOfPopup = false });
         var nextTrainRequest = new NextTrainRequest
         {
             From = FromPickerSelectedText ?? string.Empty,
@@ -68,7 +70,7 @@ public class HomePageViewModel : INotifyPropertyChanged
             }
         }
         NextTrains = trains;
-        popup.Close();
+        await popup.CloseAsync();
     }
 
     public string FromPickerSelectedText

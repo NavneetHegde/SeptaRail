@@ -1,20 +1,15 @@
-using GetTrainsFunction;
-using Microsoft.Azure.Functions.Worker;
+using Microsoft.Azure.Functions.Worker.Builder;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 
-var host = new HostBuilder()
-    .ConfigureFunctionsWorkerDefaults()
-    .ConfigureServices(services =>
-    {
-        services.AddApplicationInsightsTelemetryWorkerService();
-        services.ConfigureFunctionsApplicationInsights();
-        services.AddHttpClient("httpClient", client =>
-        {
-            client.BaseAddress = new Uri("http://www3.septa.org/hackathon/NextToArrive/");
-        });
-        services.AddTransient<NextThreeTrainFunction>();
-    })
-    .Build();
+var builder = FunctionsApplication.CreateBuilder(args);
 
-host.Run();
+builder.AddServiceDefaults();
+builder.ConfigureFunctionsWebApplication();
+
+builder.Services.AddHttpClient("httpClient", client =>
+{
+    client.BaseAddress = new Uri("http://www3.septa.org/hackathon/NextToArrive/");
+});
+
+builder.Build().Run();

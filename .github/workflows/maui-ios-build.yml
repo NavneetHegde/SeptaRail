@@ -1,0 +1,62 @@
+name: MAUI iOS Build
+
+# Replaces pipeline/Yaml_Files/ClientApp-azure-build-pipeline.yml.
+# Builds and signs the MAUI iOS app (AdHoc) and publishes the .ipa as an artifact.
+#
+# Required GitHub secrets:
+#   IOS_P12_BASE64                 - base64 of the Apple Distribution .p12 certificate
+#   IOS_P12_PASSWORD               - password for the .p12
+#   IOS_PROVISIONING_PROFILE_BASE64 - base64 of the iOSSeptaRailAdHocSigning.mobileprovision
+# The signing identity/profile name are already set in ClientApp.csproj (iOS Release PropertyGroup).
+
+on:
+  push:
+    branches:
+      - 'release/**'
+    paths:
+      - 'src/ClientApp/**'
+      - '.github/workflows/maui-ios-build.yml'
+  workflow_dispatch:
+
+jobs:
+  build-ios:
+    runs-on: macos-15
+    env:
+      DOTNET_VERSION: '10.0.x'
+      IOS_TFM: net10.0-ios
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: ${{ env.DOTNET_VERSION }}
+
+      - name: Install MAUI workload
+        run: dotnet workload install maui
+
+      - name: Import signing certificate
+        uses: apple-actions/import-codesign-certs@v3
+        with:
+          p12-file-base64: ${{ secrets.IOS_P12_BASE64 }}
+          p12-password: ${{ secrets.IOS_P12_PASSWORD }}
+
+      - name: Install provisioning profile
+        env:
+          PROVISION_BASE64: ${{ secrets.IOS_PROVISIONING_PROFILE_BASE64 }}
+        run: |
+          PROFILE_DIR="$HOME/Library/MobileDevice/Provisioning Profiles"
+          mkdir -p "$PROFILE_DIR"
+          echo "$PROVISION_BASE64" | base64 --decode > "$PROFILE_DIR/iOSSeptaRailAdHocSigning.mobileprovision"
+
+      - name: Publish iOS (.ipa)
+        run: >
+          dotnet publish src/ClientApp/ClientApp/ClientApp.csproj
+          -f $IOS_TFM -c Release
+          /p:ArchiveOnBuild=true /p:EnableAssemblyILStripping=false
+
+      - name: Upload .ipa artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: septarail-ios
+          path: '**/*.ipa'
+          if-no-files-found: error

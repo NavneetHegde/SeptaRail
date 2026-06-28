@@ -1,7 +1,7 @@
+using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.Azure.Functions.Worker;
-using Microsoft.Azure.Functions.Worker.Http;
 using Microsoft.Extensions.Logging;
-using System.Net;
 using System.Net.Http.Headers;
 using System.Text;
 using System.Text.Json;
@@ -10,72 +10,62 @@ namespace GetTrainsFunction;
 
 public class NextThreeTrainFunction
 {
-    private readonly ILogger _logger;
-    private readonly IHttpClientFactory _httpClientFactory = null!;
+    private readonly ILogger<NextThreeTrainFunction> _logger;
+    private readonly IHttpClientFactory _httpClientFactory;
 
-    public NextThreeTrainFunction(ILoggerFactory loggerFactory, IHttpClientFactory httpClientFactory)
+    public NextThreeTrainFunction(ILogger<NextThreeTrainFunction> logger, IHttpClientFactory httpClientFactory)
     {
-        _logger = loggerFactory.CreateLogger<NextThreeTrainFunction>();
+        _logger = logger;
         _httpClientFactory = httpClientFactory;
     }
 
     [Function("NextThreeTrainFunction")]
-    public async Task<HttpResponseData> Run([HttpTrigger(AuthorizationLevel.Function, "post")] HttpRequestData req)
+    public async Task<IActionResult> Run([HttpTrigger(AuthorizationLevel.Function, "post")] HttpRequest req)
     {
-        _logger.LogInformation($"GetRegionalRailRequest Start");
-
-        //1. read incoming request and parse it
-        if (req == null)
-            return req.CreateResponse(HttpStatusCode.BadRequest);
+        _logger.LogInformation("GetRegionalRailRequest Start");
 
         try
         {
-            using var streamReader = new StreamReader(req.Body, encoding: Encoding.UTF8);
-            string? jsonContent = streamReader.ReadToEnd();
+            //1. read incoming request and parse it
+            using var streamReader = new StreamReader(req.Body, Encoding.UTF8);
+            string? jsonContent = await streamReader.ReadToEndAsync();
             if (string.IsNullOrWhiteSpace(jsonContent))
-                return req.CreateResponse(HttpStatusCode.BadRequest);
+                return new BadRequestResult();
 
             ApiRequest? apiRequest = JsonSerializer.Deserialize<ApiRequest>(jsonContent, new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
-            _logger.LogInformation($"Request received for :: From {apiRequest?.From} To  {apiRequest?.To}");
+            _logger.LogInformation("Request received for :: From {From} To {To}", apiRequest?.From, apiRequest?.To);
 
             if (apiRequest is null || string.IsNullOrWhiteSpace(apiRequest.From) || string.IsNullOrWhiteSpace(apiRequest.To))
-                return req.CreateResponse(HttpStatusCode.BadRequest);
+                return new BadRequestResult();
 
             //2. call septa api to fetch the latest details
-            var FromStation = apiRequest?.From ?? "30th Street Station"; // default/fallback station
-            var ToStation = apiRequest?.To ?? "30th Street Station";  // default/fallback station
-
             var responseMsg = await CallSeptaApi(apiRequest.From, apiRequest.To);
 
             List<ApiResponse>? apiResponse = JsonSerializer.Deserialize<List<ApiResponse>>(responseMsg);
 
             //3. response
-            var response = req.CreateResponse(HttpStatusCode.OK);
-            await response.WriteAsJsonAsync(apiResponse);
-
-            return response;
+            return new OkObjectResult(apiResponse);
         }
         catch (Exception ex)
         {
-            _logger.LogError($"Error :: Message : {ex}");
-            return req.CreateResponse(HttpStatusCode.ServiceUnavailable);
+            _logger.LogError("Error :: Message : {Message}", ex);
+            return new StatusCodeResult(StatusCodes.Status503ServiceUnavailable);
         }
         finally
         {
-            _logger.LogInformation($"GetRegionalRailRequest End");
+            _logger.LogInformation("GetRegionalRailRequest End");
         }
     }
 
     /// <summary>
     /// Makes a rest call  to Septa api
     /// </summary>
-    /// <param name="log">ILogger</param>
     /// <param name="sourceStation">origination station name</param>
     /// <param name="destStation">Destination station name</param>
     /// <returns>Next three station timing with any delay</returns>
     private async Task<string> CallSeptaApi(string sourceStation, string destStation)
     {
-        _logger.LogInformation($"Calling Septa API start. from {sourceStation} to {destStation}");
+        _logger.LogInformation("Calling Septa API start. from {Source} to {Dest}", sourceStation, destStation);
 
         // create the client
         using HttpClient client = _httpClientFactory.CreateClient("httpClient");
@@ -90,24 +80,23 @@ public class NextThreeTrainFunction
             HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Get, uri);
 
             HttpResponseMessage response = await client.SendAsync(request);
-            _logger.LogInformation($"Calling Septa API complete. Result {response?.StatusCode}");
+            _logger.LogInformation("Calling Septa API complete. Result {StatusCode}", response?.StatusCode);
 
-
-            if (!response.IsSuccessStatusCode)
+            if (!response!.IsSuccessStatusCode)
             {
                 throw new Exception($"{response.StatusCode} {response.ReasonPhrase} ");
             }
 
-            return response?.Content.ReadAsStringAsync().Result ?? string.Empty;
+            return await response.Content.ReadAsStringAsync() ?? string.Empty;
         }
         catch
         {
-            _logger.LogError($"Error Calling Septa API complete");
+            _logger.LogError("Error Calling Septa API complete");
             throw;
         }
         finally
         {
-            _logger.LogInformation($"Calling Septa API end. from {sourceStation} to {destStation}");
+            _logger.LogInformation("Calling Septa API end. from {Source} to {Dest}", sourceStation, destStation);
         }
     }
 }

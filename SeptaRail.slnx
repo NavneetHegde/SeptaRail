@@ -1,0 +1,28 @@
+<Solution>
+  <Configurations>
+    <Platform Name="Any CPU" />
+    <Platform Name="x64" />
+    <Platform Name="x86" />
+  </Configurations>
+  <Folder Name="/Solution Items/">
+    <File Path=".github/workflows/function-deploy.yml" />
+    <File Path=".github/workflows/maui-ios-build.yml" />
+    <File Path="nuget.config" />
+    <File Path="README.md" />
+  </Folder>
+  <Folder Name="/src/">
+    <Project Path="src/ClientApp/ClientApp.csproj">
+      <Deploy />
+    </Project>
+    <Project Path="src/GetTrainsFunction/GetTrainsFunction.csproj" />
+    <Project Path="src/ServiceDefaults/ServiceDefaults.csproj" />
+  </Folder>
+  <Folder Name="/tests/">
+    <Project Path="test/GetTrainsFunction.Tests/GetTrainsFunction.Tests.csproj" />
+  </Folder>
+  <Folder Name="/tests/http/">
+    <File Path="test/http/GetTrainsFunction.http" />
+    <File Path="test/http/http-client.env.json" />
+    <File Path="test/http/http-client.env.json.user" />
+  </Folder>
+</Solution>

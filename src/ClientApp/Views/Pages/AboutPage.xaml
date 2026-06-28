@@ -11,10 +11,10 @@
             <VerticalStackLayout Spacing="22" Margin="25,25,25,5">
                 <HorizontalStackLayout Spacing="10">
                     <Image Source="dotnet_bot.png" SemanticProperties.Description="Seprr" HeightRequest="64" />
-                    <Label FontSize="22" FontAttributes="Bold" Text="Seprr" VerticalOptions="End" />
-                    <Label FontSize="22" Text="1.0.0-alpha" VerticalOptions="End" />
+                    <Label FontSize="22" TextColor="White" FontAttributes="Bold" Text="Seprr" VerticalOptions="End" />
+                    <Label FontSize="22" TextColor="White" Text="1.0.0-alpha" VerticalOptions="End" />
                 </HorizontalStackLayout>
-                <Label Text="Updates Septa regional rail user of next three trains arriving from specific source to destination." />
+                <Label TextColor="White" Text="Updates Septa regional rail user of next three trains arriving from specific source to destination." />
                 <Button BackgroundColor="White" Text="Learn more..."/>
             </VerticalStackLayout>
         </Border>

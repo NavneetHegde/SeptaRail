@@ -40,10 +40,13 @@ The Function's SEPTA base address is configured in `Program.cs` via a named `Htt
 Solutions: root `SeptaRail.sln` (everything). The MAUI app no longer ships its own solution — build the project directly at `src/ClientApp/ClientApp.csproj`.
 
 ```bash
+# Run everything locally via Aspire (dashboard + Azurite + the Function)
+aspire run AppHost/AppHost.cs
+
 # Build the Azure Function
 dotnet build src/GetTrainsFunction/GetTrainsFunction.csproj
 
-# Run the Function locally (needs Azure Functions Core Tools)
+# Run only the Function locally (needs Azure Functions Core Tools)
 cd src/GetTrainsFunction && func start
 
 # Run tests
@@ -80,6 +83,10 @@ Tests use the ASP.NET Core integration (`IActionResult`) shape of the isolated w
 
 ## CI/CD
 
-Azure Pipelines (`pipeline/Yaml_Files/`), one per component. Both trigger only on `release/*` branches and PRs into them, path-filtered to their own `src/` folder:
-- **GetTrainsFunction** (windows-latest): GitVersion-stamps the version, builds, runs tests with coverage, then deploys to the `GetTrainFunction` Azure Function App.
-- **ClientApp** (macos-15): installs the MAUI workload + Apple signing cert/profile and publishes the iOS `.ipa` (AdHoc). iOS signing identity/profile are also set in `ClientApp.csproj` under the iOS-Release `PropertyGroup`.
+GitHub Actions (`.github/workflows/`), one workflow per component, replacing the old Azure DevOps pipelines. Both trigger on pushes to `release/**` (and `workflow_dispatch`), path-filtered to the files they care about:
+- **`function-deploy.yml`** (ubuntu-latest): builds the Function and runs tests with coverage, then in a separate `deploy` job logs into Azure via **OIDC** (`azure/login`, `id-token: write`), installs the **Aspire CLI** (`Aspire.Cli` 13.4.x), and runs `aspire deploy AppHost/AppHost.cs` — which provisions/deploys the AppHost model (Function + storage + ACA environment) from the generated Bicep under `infra/`. Requires `AZURE_CLIENT_ID`/`AZURE_TENANT_ID`/`AZURE_SUBSCRIPTION_ID` secrets and `AZURE_LOCATION`/`AZURE_ENV_NAME` variables. The `deploy` job runs on Linux because it needs Docker to build the Function container image.
+- **`maui-ios-build.yml`** (macos-15): installs the MAUI workload, imports the Apple signing cert + provisioning profile (from `IOS_P12_BASE64`/`IOS_P12_PASSWORD`/`IOS_PROVISIONING_PROFILE_BASE64` secrets), publishes the iOS `.ipa` (AdHoc), and uploads it as an artifact. The signing identity/profile name are set in `ClientApp.csproj` under the iOS-Release `PropertyGroup`.
+
+## Aspire orchestration
+
+`AppHost/AppHost.cs` is a single-file .NET Aspire 13.4 AppHost (pinned to 13.4.x). Locally, `aspire run` orchestrates the Function with the Aspire dashboard, auto-provisioned Azurite storage, and OpenTelemetry; for publishing, `aspire publish`/`aspire deploy` generate the Bicep under `infra/` and deploy to Azure. The MAUI ClientApp is **not** orchestrated by Aspire (Aspire orchestrates services/containers, not mobile/desktop clients) — it stays a separately buildable app. See `docs/plan/` for the Aspire integration plan and task breakdown.
